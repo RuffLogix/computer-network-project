@@ -1,0 +1,21 @@
+//go:build wireinject
+// +build wireinject
+
+package main
+
+import (
+	"github.com/google/wire"
+	"github.com/rufflogix/computer-network-project/internal/controller"
+	"github.com/rufflogix/computer-network-project/internal/repository"
+	"github.com/rufflogix/computer-network-project/internal/service"
+)
+
+func InitializeWSHandler() controller.WSHandler {
+	wire.Build(
+		controller.NewWSHandler,
+		service.NewChatService,
+		repository.NewChatRepository,
+	)
+
+	return nil
+}
