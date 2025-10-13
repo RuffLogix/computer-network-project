@@ -20,3 +20,13 @@ func InitializeWSHandler() controller.WSHandler {
 	wsHandler := controller.NewWSHandler(chatService)
 	return wsHandler
 }
+
+func InitializeSSEHandler() controller.SSEHandler {
+	sseHandler := controller.NewSSEHandler()
+	return sseHandler
+}
+
+func InitializeHttpHandler() controller.HttpHandler {
+	httpHandler := controller.NewHttpHander()
+	return httpHandler
+}

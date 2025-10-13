@@ -19,3 +19,19 @@ func InitializeWSHandler() controller.WSHandler {
 
 	return nil
 }
+
+func InitializeSSEHandler() controller.SSEHandler {
+	wire.Build(
+		controller.NewSSEHandler,
+	)
+
+	return nil
+}
+
+func InitializeHttpHandler() controller.HttpHandler {
+	wire.Build(
+		controller.NewHttpHander,
+	)
+
+	return nil
+}
