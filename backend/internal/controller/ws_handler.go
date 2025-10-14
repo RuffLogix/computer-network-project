@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/rufflogix/computer-network-project/internal/entity"
 	"github.com/rufflogix/computer-network-project/internal/service"
 )
 
@@ -14,10 +15,11 @@ type WSHandler interface {
 
 type implWSHandler struct {
 	chatService service.ChatService
+	roomService service.RoomService
 }
 
-func NewWSHandler(chatService service.ChatService) WSHandler {
-	return &implWSHandler{chatService: chatService}
+func NewWSHandler(chatService service.ChatService, roomService service.RoomService) WSHandler {
+	return &implWSHandler{chatService: chatService, roomService: roomService}
 }
 
 var upgrader = websocket.Upgrader{
@@ -40,10 +42,12 @@ func (h *implWSHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		fmt.Println("Received:", string(message))
-
-		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
+		var messageJSON entity.Message
+		if err := json.Unmarshal(message, &messageJSON); err != nil {
 			break
 		}
+
+		h.roomService.AddClient(conn, messageJSON.CreatedBy)
+		h.roomService.Broadcast([]byte(messageJSON.Content), messageJSON.CreatedBy)
 	}
 }

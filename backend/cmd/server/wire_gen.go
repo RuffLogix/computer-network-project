@@ -17,7 +17,8 @@ import (
 func InitializeWSHandler() controller.WSHandler {
 	chatRepository := repository.NewChatRepository()
 	chatService := service.NewChatService(chatRepository)
-	wsHandler := controller.NewWSHandler(chatService)
+	roomService := service.NewRoomService()
+	wsHandler := controller.NewWSHandler(chatService, roomService)
 	return wsHandler
 }
 

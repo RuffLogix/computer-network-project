@@ -14,6 +14,7 @@ func InitializeWSHandler() controller.WSHandler {
 	wire.Build(
 		controller.NewWSHandler,
 		service.NewChatService,
+		service.NewRoomService,
 		repository.NewChatRepository,
 	)
 

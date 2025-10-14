@@ -18,4 +18,6 @@ func main() {
 	r.GET("/sse", func(c *gin.Context) {
 		sseHandler.HandleSSE(c.Writer, c.Request)
 	})
+
+	r.Run()
 }
