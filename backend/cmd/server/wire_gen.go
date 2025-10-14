@@ -26,7 +26,7 @@ func InitializeSSEHandler() controller.SSEHandler {
 	return sseHandler
 }
 
-func InitializeHttpHandler() controller.HttpHandler {
-	httpHandler := controller.NewHttpHander()
+func InitializeHTTPHandler() controller.HTTPHandler {
+	httpHandler := controller.NewHTTPHander()
 	return httpHandler
 }

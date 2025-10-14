@@ -1,11 +1,18 @@
 package controller
 
-type HttpHandler interface {
+import "github.com/gin-gonic/gin"
+
+type HTTPHandler interface {
+	RegisterRoutes(*gin.Engine)
 }
 
-type implHttpHandler struct {
+type implHTTPHandler struct {
 }
 
-func NewHttpHander() HttpHandler {
-	return &implHttpHandler{}
+func NewHTTPHander() HTTPHandler {
+	return &implHTTPHandler{}
+}
+
+func (h *implHTTPHandler) RegisterRoutes(router *gin.Engine) {
+
 }

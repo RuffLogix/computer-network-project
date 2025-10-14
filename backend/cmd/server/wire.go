@@ -28,9 +28,9 @@ func InitializeSSEHandler() controller.SSEHandler {
 	return nil
 }
 
-func InitializeHttpHandler() controller.HttpHandler {
+func InitializeHTTPHandler() controller.HTTPHandler {
 	wire.Build(
-		controller.NewHttpHander,
+		controller.NewHTTPHander,
 	)
 
 	return nil
