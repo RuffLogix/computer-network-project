@@ -2,6 +2,11 @@
 
 This repository contains the code for a chat application developed as part of a computer networks course project. The application consists of a backend server written in Go and a frontend application built with Next.js.
 
+Tech Stack:
+
+- **Backend**: Go (Gin, Gorilla WebSocket, GORM, PostgreSQL)
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+
 ## Backend
 
 To run the backend server, navigate to the `backend` directory and execute the following command:
