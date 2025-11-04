@@ -10,9 +10,11 @@ import { InvitationLink } from "@/components/InvitationLink";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CreateChatModal } from "@/components/CreateChatModal";
 import { FriendsList, Friend } from "@/components/FriendsList";
+import { OnlineUsersList } from "@/components/OnlineUsersList";
+import { AllChatsList } from "@/components/AllChatsList";
 import { Chat, Message } from "@/types";
 import { API_BASE_URL } from "@/constants";
-import { Bell, Users, Plus, Hash, LogOut, UserPlus } from "lucide-react";
+import { Bell, Users, Plus, Hash, LogOut, UserPlus, Globe } from "lucide-react";
 import { AuthService } from "@/lib/auth";
 
 type GeneratedInvite = {
@@ -54,8 +56,11 @@ export default function Home() {
   const [showAddFriendModal, setShowAddFriendModal] = useState(false);
   const [showGroupInviteModal, setShowGroupInviteModal] = useState(false);
   const [showFriendsList, setShowFriendsList] = useState(false);
+  const [showOnlineUsersList, setShowOnlineUsersList] = useState(false);
+  const [showAllChatsList, setShowAllChatsList] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
+  const [onlineUsersDetails, setOnlineUsersDetails] = useState<any[]>([]);
   const [friendAddMethod, setFriendAddMethod] = useState<"direct" | "link">(
     "direct"
   );
@@ -109,6 +114,7 @@ export default function Home() {
     reactions,
     typingUsers,
     onlineUsers,
+    allOnlineUsers,
   } = useWebSocket(userId);
 
   // Debug log for connection state
@@ -189,6 +195,35 @@ export default function Home() {
       return updated;
     });
   }, [onlineUsers]);
+
+  // Fetch online user details when allOnlineUsers changes
+  useEffect(() => {
+    const fetchOnlineUserDetails = async () => {
+      if (allOnlineUsers.length === 0) {
+        setOnlineUsersDetails([]);
+        return;
+      }
+
+      try {
+        const userDetailsPromises = allOnlineUsers.map(async (userId) => {
+          const response = await fetchWithUser(`/api/users/${userId}`);
+          if (response.ok) {
+            return await response.json();
+          }
+          return null;
+        });
+
+        const userDetails = await Promise.all(userDetailsPromises);
+        const validUsers = userDetails.filter((user) => user !== null);
+        setOnlineUsersDetails(validUsers);
+      } catch (error) {
+        console.error("Failed to fetch online user details:", error);
+        setOnlineUsersDetails([]);
+      }
+    };
+
+    fetchOnlineUserDetails();
+  }, [allOnlineUsers, fetchWithUser]);
 
   useEffect(() => {
     if (selectedChatId === null) return;
@@ -635,6 +670,22 @@ export default function Home() {
                     </span>
                   )}
                 </button>
+
+                <button
+                  onClick={() => setShowOnlineUsersList(true)}
+                  title="Online Users"
+                  className="relative p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  <Globe className="w-5 h-5" />
+                </button>
+
+                <button
+                  onClick={() => setShowAllChatsList(true)}
+                  title="All Chat Groups"
+                  className="relative p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  <Hash className="w-5 h-5" />
+                </button>
               </>
             )}
 
@@ -1053,6 +1104,27 @@ export default function Home() {
         <FriendsList
           friends={friends}
           onClose={() => setShowFriendsList(false)}
+        />
+      )}
+
+      {showOnlineUsersList && (
+        <OnlineUsersList
+          onlineUsers={onlineUsersDetails.map((user) => ({
+            id: user.numeric_id,
+            username: user.username,
+            name: user.name,
+          }))}
+          onClose={() => setShowOnlineUsersList(false)}
+        />
+      )}
+
+      {showAllChatsList && (
+        <AllChatsList
+          onClose={() => setShowAllChatsList(false)}
+          onChatSelect={(chatId) => {
+            setSelectedChatId(chatId);
+            setShowAllChatsList(false);
+          }}
         />
       )}
     </div>

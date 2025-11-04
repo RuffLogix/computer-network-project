@@ -77,7 +77,7 @@ func main() {
 	initializeGlobalChat(chatService)
 
 	// Initialize handlers
-	httpHandler := controller.NewHTTPHandler(chatService, invitationService, notificationService, authService, roomService)
+	httpHandler := controller.NewHTTPHandler(chatService, invitationService, notificationService, authService, roomService, userRepo)
 	wsHandler := controller.NewWSHandler(chatService, roomService, notificationService, invitationService)
 	authHandler := controller.NewAuthHandler(authService)
 

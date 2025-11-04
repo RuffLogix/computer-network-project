@@ -15,6 +15,7 @@ type ChatRepository interface {
 	GetChatByID(id int64) (*entity.Chat, error)
 	GetChatsByUser(userID int64) ([]*entity.Chat, error)
 	GetPublicChats() ([]*entity.Chat, error)
+	GetAllChats() ([]*entity.Chat, error)
 	UpdateChat(chat *entity.Chat) error
 	DeleteChat(id int64) error
 
@@ -112,6 +113,18 @@ func (r *implChatRepository) GetPublicChats() ([]*entity.Chat, error) {
 		if chat.IsPublic {
 			chats = append(chats, chat)
 		}
+	}
+
+	return chats, nil
+}
+
+func (r *implChatRepository) GetAllChats() ([]*entity.Chat, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var chats []*entity.Chat
+	for _, chat := range r.chats {
+		chats = append(chats, chat)
 	}
 
 	return chats, nil

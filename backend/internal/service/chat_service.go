@@ -11,6 +11,7 @@ type ChatService interface {
 	GetChat(id int64) (*entity.Chat, error)
 	GetUserChats(userID int64) ([]*entity.Chat, error)
 	GetPublicChats() ([]*entity.Chat, error)
+	GetAllChats() ([]*entity.Chat, error)
 
 	// Message operations
 	SendMessage(message *entity.Message) error
@@ -91,13 +92,32 @@ func (s *implChatService) GetPublicChats() ([]*entity.Chat, error) {
 	return s.chatRepository.GetPublicChats()
 }
 
+func (s *implChatService) GetAllChats() ([]*entity.Chat, error) {
+	return s.chatRepository.GetAllChats()
+}
+
 // Message operations
 func (s *implChatService) SendMessage(message *entity.Message) error {
 	return s.chatRepository.CreateMessage(message)
 }
 
 func (s *implChatService) GetMessages(chatID int64, limit, offset int) ([]*entity.Message, error) {
-	return s.chatRepository.GetMessagesByChat(chatID, limit, offset)
+	messages, err := s.chatRepository.GetMessagesByChat(chatID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate user information for each message
+	for _, message := range messages {
+		if message.CreatedBy != 0 {
+			user, err := s.userRepository.GetUserByNumericID(message.CreatedBy)
+			if err == nil {
+				message.CreatedByUser = user
+			}
+		}
+	}
+
+	return messages, nil
 }
 
 func (s *implChatService) EditMessage(messageID int64, content string) error {

@@ -134,7 +134,8 @@ export type EventType =
   | "friend_invite"
   | "group_invite"
   | "user_online"
-  | "user_offline";
+  | "user_offline"
+  | "online_users_list";
 
 export interface Event {
   type: EventType;

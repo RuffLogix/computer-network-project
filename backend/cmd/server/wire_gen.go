@@ -26,7 +26,7 @@ func InitializeHandlers(db *mongo.Database) ServerHandlers {
 	notificationService := service.NewNotificationService(notificationRepository, friendshipRepository, chatRepository, userRepository, roomService)
 	invitationService := service.NewInvitationService(invitationRepository, chatRepository, friendshipRepository, notificationService, userRepository)
 	authService := service.NewAuthService(userRepository)
-	httpHandler := controller.NewHTTPHandler(chatService, invitationService, notificationService, authService, roomService)
+	httpHandler := controller.NewHTTPHandler(chatService, invitationService, notificationService, authService, roomService, userRepository)
 	wsHandler := controller.NewWSHandler(chatService, roomService, notificationService, invitationService)
 	authHandler := controller.NewAuthHandler(authService)
 	serverHandlers := provideServerHandlers(httpHandler, wsHandler, authHandler)

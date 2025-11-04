@@ -26,6 +26,7 @@ export interface WebSocketHookReturn {
   reactions: Map<number, Reaction[]>;
   typingUsers: Map<number, Set<number>>;
   onlineUsers: Set<number>;
+  allOnlineUsers: number[];
 }
 
 export function useWebSocket(userId: number): WebSocketHookReturn {
@@ -41,6 +42,7 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
     new Map()
   );
   const [onlineUsers, setOnlineUsers] = useState<Set<number>>(new Set());
+  const [allOnlineUsers, setAllOnlineUsers] = useState<number[]>([]);
 
   const fetchWithUser = useCallback(
     (path: string, options: RequestInit = {}) => {
@@ -218,6 +220,13 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
             newSet.delete(offlineUserId);
             return newSet;
           });
+        }
+        break;
+
+      case EVENT_TYPES.ONLINE_USERS_LIST:
+        if (event.data.online_users) {
+          const onlineUsersList = event.data.online_users as number[];
+          setAllOnlineUsers(onlineUsersList);
         }
         break;
     }
@@ -538,5 +547,6 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
     reactions,
     typingUsers,
     onlineUsers,
+    allOnlineUsers,
   };
 }
