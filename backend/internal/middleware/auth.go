@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -78,36 +79,62 @@ func OptionalAuthMiddleware(authService service.AuthService) gin.HandlerFunc {
 	}
 }
 
-// GuestOrAuthMiddleware allows guest users or authenticated users
-func GuestOrAuthMiddleware(authService service.AuthService) gin.HandlerFunc {
+// ChatMembershipMiddleware checks if user is a member of private chats
+func ChatMembershipMiddleware(chatService service.ChatService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			// No auth header, consider as guest
-			c.Set("is_guest", true)
+		chatIDStr := c.Param("id")
+		chatID, err := strconv.ParseInt(chatIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chat ID"})
+			c.Abort()
+			return
+		}
+
+		userID, exists := c.Get("user_id")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+			c.Abort()
+			return
+		}
+
+		userIDInt := userID.(int64)
+
+		// Get chat details
+		chat, err := chatService.GetChat(chatID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Chat not found"})
+			c.Abort()
+			return
+		}
+
+		// Allow access to public chats
+		if chat.IsPublic {
 			c.Next()
 			return
 		}
 
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
-			c.Abort()
-			return
-		}
-
-		token := parts[1]
-		user, err := authService.ValidateToken(token)
+		// Check if user is a member of private chat
+		members, err := chatService.GetMembers(chatID)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check membership"})
 			c.Abort()
 			return
 		}
 
-		c.Set("user", user)
-		c.Set("user_id_str", user.ID.Hex())
-		c.Set("user_object", user)
-		c.Set("is_guest", user.IsGuest)
+		isMember := false
+		for _, member := range members {
+			if member.UserID == userIDInt {
+				isMember = true
+				break
+			}
+		}
+
+		if !isMember {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied: not a member of this private chat"})
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }

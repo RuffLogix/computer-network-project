@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rufflogix/computer-network-project/internal/entity"
 	"github.com/rufflogix/computer-network-project/internal/middleware"
+	"github.com/rufflogix/computer-network-project/internal/repository"
 	"github.com/rufflogix/computer-network-project/internal/service"
 )
 
@@ -23,6 +24,7 @@ type implHTTPHandler struct {
 	notificationService service.NotificationService
 	authService         service.AuthService
 	roomService         service.RoomService
+	userRepository      repository.UserRepository
 }
 
 func NewHTTPHandler(
@@ -31,6 +33,7 @@ func NewHTTPHandler(
 	notificationService service.NotificationService,
 	authService service.AuthService,
 	roomService service.RoomService,
+	userRepository repository.UserRepository,
 ) HTTPHandler {
 	return &implHTTPHandler{
 		chatService:         chatService,
@@ -38,6 +41,7 @@ func NewHTTPHandler(
 		notificationService: notificationService,
 		authService:         authService,
 		roomService:         roomService,
+		userRepository:      userRepository,
 	}
 }
 
@@ -58,12 +62,12 @@ func (h *implHTTPHandler) RegisterRoutes(router *gin.Engine) {
 		chats := authorized.Group("/chats")
 		{
 			chats.POST("", h.createChat)
-			chats.GET("/:id", h.getChat)
+			chats.GET("/:id", middleware.ChatMembershipMiddleware(h.chatService), h.getChat)
 			chats.GET("", h.getUserChats)
-			chats.POST("/:id/messages", h.sendMessage)
-			chats.GET("/:id/messages", h.getMessages)
-			chats.POST("/:id/members", h.addMember)
-			chats.DELETE("/:id/members/:userId", h.removeMember)
+			chats.POST("/:id/messages", middleware.ChatMembershipMiddleware(h.chatService), h.sendMessage)
+			chats.GET("/:id/messages", middleware.ChatMembershipMiddleware(h.chatService), h.getMessages)
+			chats.POST("/:id/members", middleware.ChatMembershipMiddleware(h.chatService), h.addMember)
+			chats.DELETE("/:id/members/:userId", middleware.ChatMembershipMiddleware(h.chatService), h.removeMember)
 			chats.POST("/:id/join", h.joinPublicChat)
 		}
 
@@ -101,6 +105,15 @@ func (h *implHTTPHandler) RegisterRoutes(router *gin.Engine) {
 
 		// Friends routes
 		authorized.GET("/friends", h.getFriends)
+
+		// User routes
+		authorized.GET("/users/:id", h.getUserByID)
+
+		// Online users route
+		authorized.GET("/online-users", h.getOnlineUsers)
+
+		// All chats route
+		authorized.GET("/all-chats", h.getAllChats)
 
 		// Media upload route
 		authorized.POST("/upload", h.uploadMedia)
@@ -655,6 +668,173 @@ func (h *implHTTPHandler) getFriends(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, friends)
+}
+
+func (h *implHTTPHandler) getOnlineUsers(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	// Get all online user IDs
+	onlineUserIDs := h.roomService.GetOnlineUsers()
+
+	// Get user's chats to find all members
+	userChats, err := h.chatService.GetUserChats(userID.(int64))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Build a set of user IDs that share chats with the current user
+	visibleUserIDs := make(map[int64]bool)
+	for _, chat := range userChats {
+		members, err := h.chatService.GetMembers(chat.ID)
+		if err != nil {
+			continue
+		}
+		for _, member := range members {
+			if member.UserID != userID.(int64) {
+				visibleUserIDs[member.UserID] = true
+			}
+		}
+	}
+
+	// Get user details for online users that are visible to current user
+	type OnlineUserResponse struct {
+		ID       int64  `json:"id"`
+		Username string `json:"username"`
+		Name     string `json:"name"`
+	}
+
+	var onlineUsers []OnlineUserResponse
+	for _, id := range onlineUserIDs {
+		// Only include users that share a chat with the current user
+		if !visibleUserIDs[id] && id != userID.(int64) {
+			continue
+		}
+
+		user, err := h.userRepository.GetUserByNumericID(id)
+		if err != nil {
+			continue // Skip users we can't find
+		}
+		onlineUsers = append(onlineUsers, OnlineUserResponse{
+			ID:       user.NumericID,
+			Username: user.Username,
+			Name:     user.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, onlineUsers)
+}
+
+func (h *implHTTPHandler) getAllChats(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userIDInt := userID.(int64)
+
+	// Get all chats from the service
+	allChats, err := h.chatService.GetAllChats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get online users for member status
+	onlineUserIDs := h.roomService.GetOnlineUsers()
+	onlineUsersMap := make(map[int64]bool)
+	for _, id := range onlineUserIDs {
+		onlineUsersMap[id] = true
+	}
+
+	// Define response types
+	type ChatMemberWithStatus struct {
+		entity.ChatMember
+		User     *entity.User `json:"user"`
+		IsOnline bool         `json:"is_online"`
+	}
+
+	type ChatWithMembersResponse struct {
+		entity.Chat
+		Members []ChatMemberWithStatus `json:"members"`
+	}
+
+	var response []ChatWithMembersResponse
+	for _, chat := range allChats {
+		// Filter chats: show public chats or private chats where user is a member
+		if !chat.IsPublic {
+			// Check if user is a member of this private chat
+			isMember := false
+			members, err := h.chatService.GetMembers(chat.ID)
+			if err != nil {
+				continue // Skip chats with member fetch errors
+			}
+			for _, member := range members {
+				if member.UserID == userIDInt {
+					isMember = true
+					break
+				}
+			}
+			if !isMember {
+				continue // Skip private chats where user is not a member
+			}
+		}
+
+		members, err := h.chatService.GetMembers(chat.ID)
+		if err != nil {
+			continue // Skip chats with member fetch errors
+		}
+
+		var membersWithStatus []ChatMemberWithStatus
+		for _, member := range members {
+			user, err := h.userRepository.GetUserByNumericID(member.UserID)
+			if err != nil {
+				user = nil // Skip user details if we can't fetch
+			}
+			membersWithStatus = append(membersWithStatus, ChatMemberWithStatus{
+				ChatMember: *member,
+				User:       user,
+				IsOnline:   onlineUsersMap[member.UserID],
+			})
+		}
+
+		response = append(response, ChatWithMembersResponse{
+			Chat:    *chat,
+			Members: membersWithStatus,
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// Get user by ID
+func (h *implHTTPHandler) getUserByID(c *gin.Context) {
+	idStr := c.Param("id")
+	userID, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	user, err := h.userRepository.GetUserByNumericID(userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Return user data (exclude sensitive information)
+	c.JSON(http.StatusOK, gin.H{
+		"id":         user.ID.Hex(),
+		"numeric_id": user.NumericID,
+		"username":   user.Username,
+		"name":       user.Name,
+		"is_guest":   user.IsGuest,
+	})
 }
 
 // Media upload handler

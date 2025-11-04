@@ -85,6 +85,9 @@ func (h *implWSHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 			// Broadcast online status to friends
 			h.broadcastUserStatus(userID, true)
+
+			// Send the complete online users list to the newly connected user
+			h.sendOnlineUsersList(userID)
 		}
 
 		// Update userID if changed
@@ -423,6 +426,62 @@ func (h *implWSHandler) broadcastUserStatus(userID int64, isOnline bool) {
 		}
 		h.roomService.SendToUser(friendID, statusEvent)
 	}
+
+	// Broadcast the updated online users list to all connected clients
+	h.broadcastOnlineUsersList()
+}
+
+// Broadcast the complete list of online users to all connected clients
+func (h *implWSHandler) broadcastOnlineUsersList() {
+	onlineUserIDs := h.roomService.GetOnlineUsers()
+
+	// Send personalized online user lists to each connected user
+	for _, userID := range onlineUserIDs {
+		h.sendOnlineUsersList(userID)
+	}
+}
+
+// Send the complete list of online users to a specific user (filtered by shared chats)
+func (h *implWSHandler) sendOnlineUsersList(userID int64) {
+	onlineUserIDs := h.roomService.GetOnlineUsers()
+
+	// Get user's chats to find all members they can see
+	userChats, err := h.chatService.GetUserChats(userID)
+	if err != nil {
+		log.Printf("Error getting user chats for online list: %v", err)
+		return
+	}
+
+	// Build a set of user IDs that share chats with the current user
+	visibleUserIDs := make(map[int64]bool)
+	for _, chat := range userChats {
+		members, err := h.chatService.GetMembers(chat.ID)
+		if err != nil {
+			continue
+		}
+		for _, member := range members {
+			if member.UserID != userID {
+				visibleUserIDs[member.UserID] = true
+			}
+		}
+	}
+
+	// Filter online users to only those visible to this user
+	var filteredOnlineUsers []int64
+	for _, id := range onlineUserIDs {
+		if visibleUserIDs[id] || id == userID {
+			filteredOnlineUsers = append(filteredOnlineUsers, id)
+		}
+	}
+
+	onlineUsersEvent := entity.Event{
+		Type: "online_users_list",
+		Data: map[string]interface{}{
+			"online_users": filteredOnlineUsers,
+		},
+	}
+
+	h.roomService.SendToUser(userID, onlineUsersEvent)
 }
 
 func (h *implWSHandler) broadcastEvent(chatID int64, event entity.Event, excludeUserID int64) {

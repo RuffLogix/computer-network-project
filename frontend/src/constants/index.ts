@@ -41,6 +41,7 @@ export const EVENT_TYPES = {
   GROUP_INVITE: "group_invite",
   USER_ONLINE: "user_online",
   USER_OFFLINE: "user_offline",
+  ONLINE_USERS_LIST: "online_users_list",
 } as const;
 
 export const NOTIFICATION_TYPES = {

@@ -105,3 +105,76 @@ func CreateChatIndexes(db *mongo.Database) error {
 	log.Println("Database indexes created successfully")
 	return nil
 }
+func CreateFriendshipIndexes(db *mongo.Database) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Friendships collection indexes
+	friendshipsCol := db.Collection("friendships")
+	_, err := friendshipsCol.Indexes().CreateMany(ctx, []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "id", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bson.D{{Key: "user_id", Value: 1}},
+		},
+		{
+			Keys: bson.D{{Key: "friend_id", Value: 1}},
+		},
+		{
+			Keys: bson.D{{Key: "status", Value: 1}},
+		},
+		{
+			Keys: bson.D{
+				{Key: "user_id", Value: 1},
+				{Key: "friend_id", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
+		},
+	})
+	if err != nil {
+		log.Printf("Warning: Failed to create friendships indexes: %v", err)
+		return err
+	}
+
+	log.Println("Friendship indexes created successfully")
+	return nil
+}
+
+// CreateNotificationIndexes creates indexes for notifications collection
+func CreateNotificationIndexes(db *mongo.Database) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Notifications collection indexes
+	notificationsCol := db.Collection("notifications")
+	_, err := notificationsCol.Indexes().CreateMany(ctx, []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "id", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bson.D{{Key: "recipient_id", Value: 1}},
+		},
+		{
+			Keys: bson.D{{Key: "status", Value: 1}},
+		},
+		{
+			Keys: bson.D{
+				{Key: "recipient_id", Value: 1},
+				{Key: "status", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{{Key: "created_at", Value: -1}},
+		},
+	})
+	if err != nil {
+		log.Printf("Warning: Failed to create notifications indexes: %v", err)
+		return err
+	}
+
+	log.Println("Notification indexes created successfully")
+	return nil
+}

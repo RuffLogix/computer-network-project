@@ -17,6 +17,7 @@ type AuthService interface {
 	Login(username, password string) (*entity.User, string, error)
 	CreateGuestUser(name string) (*entity.User, string, error)
 	ValidateToken(tokenString string) (*entity.User, error)
+	GetUserByNumericID(id int64) (*entity.User, error)
 }
 
 type implAuthService struct {
@@ -169,4 +170,8 @@ func (s *implAuthService) generateToken(user *entity.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(jwtSecret))
+}
+
+func (s *implAuthService) GetUserByNumericID(id int64) (*entity.User, error) {
+	return s.userRepo.GetUserByNumericID(id)
 }
