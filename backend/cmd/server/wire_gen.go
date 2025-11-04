@@ -16,12 +16,12 @@ import (
 // Injectors from wire.go:
 
 func InitializeHandlers(db *mongo.Database) ServerHandlers {
-	chatRepository := repository.NewChatRepository()
+	chatRepository := repository.NewMongoChatRepository(db)
 	userRepository := repository.NewUserRepository(db)
 	chatService := service.NewChatService(chatRepository, userRepository)
 	invitationRepository := repository.NewInvitationRepository()
-	friendshipRepository := repository.NewFriendshipRepository()
-	notificationRepository := repository.NewNotificationRepository()
+	friendshipRepository := repository.NewMongoFriendshipRepository(db)
+	notificationRepository := repository.NewMongoNotificationRepository(db)
 	roomService := service.NewRoomService()
 	notificationService := service.NewNotificationService(notificationRepository, friendshipRepository, chatRepository, userRepository, roomService)
 	invitationService := service.NewInvitationService(invitationRepository, chatRepository, friendshipRepository, notificationService, userRepository)

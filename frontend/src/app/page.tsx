@@ -329,6 +329,7 @@ export default function Home() {
           throw new Error(errorMessage);
         }
         await refreshNotifications();
+        await fetchFriends(); // Refresh friends list after accepting notification
       } catch (error) {
         console.error("Failed to accept notification:", error);
         alert(
@@ -338,7 +339,7 @@ export default function Home() {
         );
       }
     },
-    [fetchWithUser, refreshNotifications]
+    [fetchWithUser, refreshNotifications, fetchFriends]
   );
 
   const handleRejectNotification = useCallback(

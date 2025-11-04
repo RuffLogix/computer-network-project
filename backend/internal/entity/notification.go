@@ -23,15 +23,15 @@ const (
 )
 
 type Notification struct {
-	ID          int64              `json:"id"`
-	RecipientID int64              `json:"recipient_id"`
-	SenderID    int64              `json:"sender_id"`
-	Type        NotificationType   `json:"type"`
-	Status      NotificationStatus `json:"status"`
-	Title       string             `json:"title"`
-	Message     string             `json:"message"`
-	ReferenceID *int64             `json:"reference_id,omitempty"` // Can reference chat, message, friendship, etc.
-	CreatedAt   time.Time          `json:"created_at"`
-	UpdatedAt   time.Time          `json:"updated_at"`
-	Sender      *User              `json:"sender,omitempty"`
+	ID          int64              `bson:"id" json:"id"`
+	RecipientID int64              `bson:"recipient_id" json:"recipient_id"`
+	SenderID    int64              `bson:"sender_id" json:"sender_id"`
+	Type        NotificationType   `bson:"type" json:"type"`
+	Status      NotificationStatus `bson:"status" json:"status"`
+	Title       string             `bson:"title" json:"title"`
+	Message     string             `bson:"message" json:"message"`
+	ReferenceID *int64             `bson:"reference_id,omitempty" json:"reference_id,omitempty"` // Can reference chat, message, friendship, etc.
+	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
+	UpdatedAt   time.Time          `bson:"updated_at" json:"updated_at"`
+	Sender      *User              `bson:"-" json:"sender,omitempty"`
 }

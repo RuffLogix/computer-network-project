@@ -31,10 +31,10 @@ func provideServerHandlers(
 
 func InitializeHandlers(db *mongo.Database) ServerHandlers {
 	wire.Build(
-		repository.NewChatRepository,
+		repository.NewMongoChatRepository,
 		repository.NewInvitationRepository,
-		repository.NewFriendshipRepository,
-		repository.NewNotificationRepository,
+		repository.NewMongoFriendshipRepository,
+		repository.NewMongoNotificationRepository,
 		repository.NewUserRepository,
 		service.NewRoomService,
 		service.NewChatService,

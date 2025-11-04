@@ -56,15 +56,21 @@ func main() {
 
 	// Create database indexes
 	if err := repository.CreateChatIndexes(db); err != nil {
-		log.Printf("Warning: Failed to create indexes: %v", err)
+		log.Printf("Warning: Failed to create chat indexes: %v", err)
+	}
+	if err := repository.CreateFriendshipIndexes(db); err != nil {
+		log.Printf("Warning: Failed to create friendship indexes: %v", err)
+	}
+	if err := repository.CreateNotificationIndexes(db); err != nil {
+		log.Printf("Warning: Failed to create notification indexes: %v", err)
 	}
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	chatRepo := repository.NewMongoChatRepository(db)
 	invitationRepo := repository.NewInvitationRepository()
-	friendshipRepo := repository.NewFriendshipRepository()
-	notificationRepo := repository.NewNotificationRepository()
+	friendshipRepo := repository.NewMongoFriendshipRepository(db)
+	notificationRepo := repository.NewMongoNotificationRepository(db)
 
 	// Initialize services
 	roomService := service.NewRoomService()

@@ -29,14 +29,14 @@ const (
 )
 
 type Friendship struct {
-	ID        int64            `json:"id"`
-	UserID    int64            `json:"user_id"`
-	FriendID  int64            `json:"friend_id"`
-	Status    FriendshipStatus `json:"status"`
-	CreatedAt time.Time        `json:"created_at"`
-	UpdatedAt time.Time        `json:"updated_at"`
-	User      *User            `json:"user,omitempty"`
-	Friend    *User            `json:"friend,omitempty"`
+	ID        int64            `bson:"id" json:"id"`
+	UserID    int64            `bson:"user_id" json:"user_id"`
+	FriendID  int64            `bson:"friend_id" json:"friend_id"`
+	Status    FriendshipStatus `bson:"status" json:"status"`
+	CreatedAt time.Time        `bson:"created_at" json:"created_at"`
+	UpdatedAt time.Time        `bson:"updated_at" json:"updated_at"`
+	User      *User            `bson:"-" json:"user,omitempty"`
+	Friend    *User            `bson:"-" json:"friend,omitempty"`
 }
 
 type FriendInvitation struct {
