@@ -10,24 +10,45 @@ import (
 	"github.com/rufflogix/computer-network-project/internal/controller"
 	"github.com/rufflogix/computer-network-project/internal/repository"
 	"github.com/rufflogix/computer-network-project/internal/service"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Injectors from wire.go:
 
-func InitializeWSHandler() controller.WSHandler {
+func InitializeHandlers(db *mongo.Database) ServerHandlers {
 	chatRepository := repository.NewChatRepository()
-	chatService := service.NewChatService(chatRepository)
+	userRepository := repository.NewUserRepository(db)
+	chatService := service.NewChatService(chatRepository, userRepository)
+	invitationRepository := repository.NewInvitationRepository()
+	friendshipRepository := repository.NewFriendshipRepository()
+	notificationRepository := repository.NewNotificationRepository()
 	roomService := service.NewRoomService()
-	wsHandler := controller.NewWSHandler(chatService, roomService)
-	return wsHandler
+	notificationService := service.NewNotificationService(notificationRepository, friendshipRepository, chatRepository, userRepository, roomService)
+	invitationService := service.NewInvitationService(invitationRepository, chatRepository, friendshipRepository, notificationService, userRepository)
+	authService := service.NewAuthService(userRepository)
+	httpHandler := controller.NewHTTPHandler(chatService, invitationService, notificationService, authService, roomService)
+	wsHandler := controller.NewWSHandler(chatService, roomService, notificationService, invitationService)
+	authHandler := controller.NewAuthHandler(authService)
+	serverHandlers := provideServerHandlers(httpHandler, wsHandler, authHandler)
+	return serverHandlers
 }
 
-func InitializeSSEHandler() controller.SSEHandler {
-	sseHandler := controller.NewSSEHandler()
-	return sseHandler
+// wire.go:
+
+type ServerHandlers struct {
+	HTTP controller.HTTPHandler
+	WS   controller.WSHandler
+	Auth controller.AuthHandler
 }
 
-func InitializeHTTPHandler() controller.HTTPHandler {
-	httpHandler := controller.NewHTTPHander()
-	return httpHandler
+func provideServerHandlers(
+	httpHandler controller.HTTPHandler,
+	wsHandler controller.WSHandler,
+	authHandler controller.AuthHandler,
+) ServerHandlers {
+	return ServerHandlers{
+		HTTP: httpHandler,
+		WS:   wsHandler,
+		Auth: authHandler,
+	}
 }
