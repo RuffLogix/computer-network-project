@@ -35,6 +35,8 @@ export default function Home() {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [showCreateChatModal, setShowCreateChatModal] = useState(false);
   const joinedRooms = useRef<Set<number>>(new Set());
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Check authentication on mount
   useEffect(() => {
@@ -116,6 +118,12 @@ export default function Home() {
     onlineUsers,
     allOnlineUsers,
   } = useWebSocket(userId);
+
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
 
   // Debug log for connection state
   // useEffect(() => {
@@ -282,8 +290,12 @@ export default function Home() {
       if (!selectedChatId) return;
       sendMessage(selectedChatId, content, type, mediaUrl, replyToId);
       setReplyTo(null);
+      // Scroll to bottom when sending a message
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     },
-    [selectedChatId, sendMessage]
+    [selectedChatId, sendMessage, scrollToBottom]
   );
 
   const handleJoinPublicChat = useCallback(
@@ -570,6 +582,16 @@ export default function Home() {
       messages?.filter((message) => message.chat_id === selectedChatId) || []
     );
   }, [messages, selectedChatId]);
+
+  // Scroll to bottom when chat messages change
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [chatMessages, scrollToBottom]);
 
   const activeTypingCount = selectedChatId
     ? typingUsers.get(selectedChatId)?.size ?? 0
@@ -896,6 +918,7 @@ export default function Home() {
                   : `${activeTypingCount} people are typing...`}
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           {selectedChatId !== null ? (
