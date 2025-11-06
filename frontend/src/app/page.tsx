@@ -820,6 +820,7 @@ export default function Home() {
                 const currentChat = chats.find((c) => c.id === selectedChatId);
                 const isPrivateGroup = currentChat?.type === "private_group";
                 const isPublicGroup = currentChat?.type === "public_group";
+                const isGlobalChat = currentChat?.name === "Global Chat";
 
                 if (isPrivateGroup) {
                   return (
@@ -838,7 +839,7 @@ export default function Home() {
                       </button>
                     </div>
                   );
-                } else if (isPublicGroup) {
+                } else if (isPublicGroup && !isGlobalChat) {
                   return (
                     <button
                       onClick={() => handleLeaveGroup(selectedChatId)}
