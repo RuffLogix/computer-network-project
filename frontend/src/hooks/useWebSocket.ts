@@ -405,6 +405,11 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
 
   const editMessage = useCallback(
     (messageId: number, content: string, chatId: number) => {
+      // Optimistically update the message content immediately
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === messageId ? { ...msg, content } : msg))
+      );
+
       sendEvent({
         type: EVENT_TYPES.EDIT_MESSAGE,
         data: {
@@ -420,6 +425,9 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
 
   const deleteMessage = useCallback(
     (messageId: number, chatId: number) => {
+      // Optimistically remove the message immediately
+      setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+
       sendEvent({
         type: EVENT_TYPES.DELETE_MESSAGE,
         data: {

@@ -221,20 +221,18 @@ func (h *implWSHandler) handleEditMessage(event *entity.Event) {
 	}
 
 	content, _ := event.Data["content"].(string)
+	chatID, ok := event.Data["chat_id"].(float64)
+	if !ok {
+		return
+	}
 
 	if err := h.chatService.EditMessage(int64(messageID), content); err != nil {
 		log.Printf("Error editing message: %v", err)
 		return
 	}
 
-	// Get message to find chat ID
-	message, err := h.chatService.GetMessages(0, 1, 0) // This is simplified
-	if err != nil || len(message) == 0 {
-		return
-	}
-
 	// Broadcast edit event
-	h.broadcastEvent(message[0].ChatID, entity.Event{
+	h.broadcastEvent(int64(chatID), entity.Event{
 		Type: entity.EDIT_MESSAGE,
 		Data: map[string]interface{}{
 			"message_id": messageID,

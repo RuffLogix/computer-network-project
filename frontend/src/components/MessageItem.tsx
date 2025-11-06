@@ -189,11 +189,13 @@ export function MessageItem({
             <Reply className="w-4 h-4" />
           </button>
           {isOwnMessage && (
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded relative"
-            >
-              <MoreVertical className="w-4 h-4" />
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
               {showMenu && (
                 <div className="absolute right-0 mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden z-10">
                   <button
@@ -218,7 +220,7 @@ export function MessageItem({
                   </button>
                 </div>
               )}
-            </button>
+            </div>
           )}
         </div>
 
