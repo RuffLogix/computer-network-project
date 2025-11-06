@@ -20,6 +20,7 @@ type implWSHandler struct {
 	roomService         service.RoomService
 	notificationService service.NotificationService
 	invitationService   service.InvitationService
+	globalChatID        int64
 }
 
 func NewWSHandler(
@@ -27,12 +28,14 @@ func NewWSHandler(
 	roomService service.RoomService,
 	notificationService service.NotificationService,
 	invitationService service.InvitationService,
+	globalChatID int64,
 ) WSHandler {
 	return &implWSHandler{
 		chatService:         chatService,
 		roomService:         roomService,
 		notificationService: notificationService,
 		invitationService:   invitationService,
+		globalChatID:        globalChatID,
 	}
 }
 
@@ -88,6 +91,14 @@ func (h *implWSHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 			// Send the complete online users list to the newly connected user
 			h.sendOnlineUsersList(userID)
+
+			// Automatically join the global chat
+			if h.globalChatID != 0 {
+				isNewJoin := h.roomService.JoinRoom(userID, h.globalChatID)
+				if isNewJoin {
+					log.Printf("User %d automatically joined global chat %d", userID, h.globalChatID)
+				}
+			}
 		}
 
 		// Update userID if changed

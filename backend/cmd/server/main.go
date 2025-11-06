@@ -15,18 +15,18 @@ import (
 	"github.com/rufflogix/computer-network-project/internal/service"
 )
 
-func initializeGlobalChat(chatService service.ChatService) {
+func initializeGlobalChat(chatService service.ChatService) int64 {
 	// Check if "Global Chat" already exists in public chats
 	chats, err := chatService.GetPublicChats()
 	if err != nil {
 		log.Printf("Warning: Could not check for existing global chat: %v", err)
-		return
+		return 0
 	}
 
 	for _, chat := range chats {
 		if chat.Name == "Global Chat" && chat.Type == "public_group" {
 			log.Println("Global Chat already exists")
-			return
+			return chat.ID
 		}
 	}
 
@@ -44,10 +44,11 @@ func initializeGlobalChat(chatService service.ChatService) {
 	err = chatService.CreateChat(globalChat)
 	if err != nil {
 		log.Printf("Warning: Could not create global chat: %v", err)
-		return
+		return 0
 	}
 
 	log.Println("Global Chat created successfully")
+	return globalChat.ID
 }
 
 func main() {
@@ -80,12 +81,12 @@ func main() {
 	authService := service.NewAuthService(userRepo)
 
 	// Initialize global chat if it doesn't exist
-	initializeGlobalChat(chatService)
+	globalChatID := initializeGlobalChat(chatService)
 
 	// Initialize handlers
 	httpHandler := controller.NewHTTPHandler(chatService, invitationService, notificationService, authService, roomService, userRepo)
-	wsHandler := controller.NewWSHandler(chatService, roomService, notificationService, invitationService)
-	authHandler := controller.NewAuthHandler(authService)
+	wsHandler := controller.NewWSHandler(chatService, roomService, notificationService, invitationService, globalChatID)
+	authHandler := controller.NewAuthHandler(authService, chatService, globalChatID)
 
 	r := gin.Default()
 

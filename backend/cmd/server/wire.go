@@ -13,19 +13,13 @@ import (
 
 type ServerHandlers struct {
 	HTTP controller.HTTPHandler
-	WS   controller.WSHandler
-	Auth controller.AuthHandler
 }
 
 func provideServerHandlers(
 	httpHandler controller.HTTPHandler,
-	wsHandler controller.WSHandler,
-	authHandler controller.AuthHandler,
 ) ServerHandlers {
 	return ServerHandlers{
 		HTTP: httpHandler,
-		WS:   wsHandler,
-		Auth: authHandler,
 	}
 }
 
@@ -42,8 +36,6 @@ func InitializeHandlers(db *mongo.Database) ServerHandlers {
 		service.NewInvitationService,
 		service.NewAuthService,
 		controller.NewHTTPHandler,
-		controller.NewWSHandler,
-		controller.NewAuthHandler,
 		provideServerHandlers,
 	)
 

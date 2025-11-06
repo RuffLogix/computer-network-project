@@ -12,12 +12,16 @@ type AuthHandler interface {
 }
 
 type implAuthHandler struct {
-	authService service.AuthService
+	authService  service.AuthService
+	chatService  service.ChatService
+	globalChatID int64
 }
 
-func NewAuthHandler(authService service.AuthService) AuthHandler {
+func NewAuthHandler(authService service.AuthService, chatService service.ChatService, globalChatID int64) AuthHandler {
 	return &implAuthHandler{
-		authService: authService,
+		authService:  authService,
+		chatService:  chatService,
+		globalChatID: globalChatID,
 	}
 }
 
@@ -49,6 +53,14 @@ func (h *implAuthHandler) register(c *gin.Context) {
 		return
 	}
 
+	// Add user to global chat
+	if h.globalChatID != 0 {
+		if err := h.chatService.AddMember(h.globalChatID, user.NumericID, "member"); err != nil {
+			// Log error but don't fail registration
+			// TODO: Add proper logging
+		}
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
 		"user":  user,
 		"token": token,
@@ -72,6 +84,14 @@ func (h *implAuthHandler) login(c *gin.Context) {
 		return
 	}
 
+	// Add user to global chat if not already a member
+	if h.globalChatID != 0 {
+		if err := h.chatService.AddMember(h.globalChatID, user.NumericID, "member"); err != nil {
+			// Log error but don't fail login
+			// TODO: Add proper logging
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"user":  user,
 		"token": token,
@@ -92,6 +112,14 @@ func (h *implAuthHandler) createGuest(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Add guest user to global chat
+	if h.globalChatID != 0 {
+		if err := h.chatService.AddMember(h.globalChatID, user.NumericID, "member"); err != nil {
+			// Log error but don't fail guest creation
+			// TODO: Add proper logging
+		}
 	}
 
 	c.JSON(http.StatusCreated, gin.H{

@@ -27,9 +27,7 @@ func InitializeHandlers(db *mongo.Database) ServerHandlers {
 	invitationService := service.NewInvitationService(invitationRepository, chatRepository, friendshipRepository, notificationService, userRepository)
 	authService := service.NewAuthService(userRepository)
 	httpHandler := controller.NewHTTPHandler(chatService, invitationService, notificationService, authService, roomService, userRepository)
-	wsHandler := controller.NewWSHandler(chatService, roomService, notificationService, invitationService)
-	authHandler := controller.NewAuthHandler(authService)
-	serverHandlers := provideServerHandlers(httpHandler, wsHandler, authHandler)
+	serverHandlers := provideServerHandlers(httpHandler)
 	return serverHandlers
 }
 
@@ -37,18 +35,12 @@ func InitializeHandlers(db *mongo.Database) ServerHandlers {
 
 type ServerHandlers struct {
 	HTTP controller.HTTPHandler
-	WS   controller.WSHandler
-	Auth controller.AuthHandler
 }
 
 func provideServerHandlers(
 	httpHandler controller.HTTPHandler,
-	wsHandler controller.WSHandler,
-	authHandler controller.AuthHandler,
 ) ServerHandlers {
 	return ServerHandlers{
 		HTTP: httpHandler,
-		WS:   wsHandler,
-		Auth: authHandler,
 	}
 }
