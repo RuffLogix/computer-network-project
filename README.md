@@ -4,7 +4,7 @@ This repository contains the code for a chat application developed as part of a 
 
 Tech Stack:
 
-- **Backend**: Go (Gin, Gorilla WebSocket, GORM, PostgreSQL)
+- **Backend**: Go (Gin, Gorilla WebSocket, MongoDB)
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS
 
 ## Backend
