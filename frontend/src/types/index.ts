@@ -1,5 +1,5 @@
 export type ChatType = "individual" | "private_group" | "public_group";
-export type MessageType = "text" | "image" | "video" | "system";
+export type MessageType = "text" | "image" | "video" | "sticker" | "system";
 export type ReactionType = "like" | "love" | "laugh" | "wow" | "sad" | "angry";
 export type FriendshipStatus = "pending" | "accepted" | "rejected" | "blocked";
 export type NotificationType =
@@ -145,4 +145,10 @@ export interface Event {
 
 export interface Friend extends User {
   is_online: boolean;
+}
+
+export interface OnlineUser {
+  id: number;
+  username: string;
+  name: string;
 }

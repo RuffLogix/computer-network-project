@@ -56,6 +56,30 @@ export function MessageItem({
       );
     }
 
+    if (message.type === "sticker") {
+      // Check if it's an SVG
+      if (message.media_url.endsWith(".svg")) {
+        return (
+          <img
+            src={message.media_url}
+            alt="Sticker"
+            className="h-24 w-24 object-contain"
+            draggable={false}
+          />
+        );
+      }
+      return (
+        <NextImage
+          src={message.media_url}
+          alt="Sticker"
+          width={100}
+          height={100}
+          unoptimized
+          className="h-auto max-w-xs"
+        />
+      );
+    }
+
     if (message.type === "video") {
       return (
         <video

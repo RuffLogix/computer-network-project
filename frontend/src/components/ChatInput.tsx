@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, X } from "lucide-react";
+import { Send, X, Smile } from "lucide-react";
 import { MediaUpload } from "./MediaUpload";
+import { StickerPicker } from "./StickerPicker";
 import { Message } from "@/types";
 
 interface ChatInputProps {
@@ -27,9 +28,10 @@ export function ChatInput({
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [mediaUrl, setMediaUrl] = useState<string>("");
-  const [mediaType, setMediaType] = useState<"image" | "video" | "text">(
-    "text"
-  );
+  const [mediaType, setMediaType] = useState<
+    "image" | "video" | "sticker" | "text"
+  >("text");
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -80,9 +82,16 @@ export function ChatInput({
     }
   };
 
-  const handleMediaUpload = (url: string, type: "image" | "video") => {
+  const handleMediaUpload = (
+    url: string,
+    type: "image" | "video" | "sticker"
+  ) => {
     setMediaUrl(url);
     setMediaType(type);
+  };
+
+  const handleStickerSelect = (stickerUrl: string) => {
+    onSendMessage("", "sticker", stickerUrl);
   };
 
   return (
@@ -107,7 +116,25 @@ export function ChatInput({
       )}
 
       <div className="flex items-end gap-2">
-        <MediaUpload userId={userId} onUpload={handleMediaUpload} />
+        <div className="flex items-center gap-1">
+          <MediaUpload userId={userId} onUpload={handleMediaUpload} />
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowStickerPicker(!showStickerPicker);
+              }}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              title="Add sticker"
+            >
+              <Smile className="w-5 h-5" />
+            </button>
+            <StickerPicker
+              onSelectSticker={handleStickerSelect}
+              isOpen={showStickerPicker}
+              onClose={() => setShowStickerPicker(false)}
+            />
+          </div>
+        </div>
 
         <div className="flex-1">
           <input
@@ -132,7 +159,8 @@ export function ChatInput({
 
       {mediaUrl && (
         <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {mediaType === "image" ? "📷" : "🎥"} Media attached
+          {mediaType === "image" ? "📷" : mediaType === "video" ? "🎥" : "😊"}{" "}
+          {mediaType === "sticker" ? "Sticker attached" : "Media attached"}
         </div>
       )}
     </div>

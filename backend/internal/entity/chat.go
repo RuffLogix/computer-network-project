@@ -24,10 +24,11 @@ type Chat struct {
 type MessageType string
 
 const (
-	Text   MessageType = "text"
-	Image  MessageType = "image"
-	Video  MessageType = "video"
-	System MessageType = "system"
+	Text    MessageType = "text"
+	Image   MessageType = "image"
+	Video   MessageType = "video"
+	Sticker MessageType = "sticker"
+	System  MessageType = "system"
 )
 
 type Message struct {

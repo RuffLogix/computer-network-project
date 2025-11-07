@@ -36,7 +36,6 @@ export default function Home() {
   const [showCreateChatModal, setShowCreateChatModal] = useState(false);
   const joinedRooms = useRef<Set<number>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   // Check authentication on mount
   useEffect(() => {
     if (!AuthService.isAuthenticated()) {
@@ -876,7 +875,7 @@ export default function Home() {
               })()}
             </div>
           )}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 pb-4">
             {selectedChatId === null ? (
               <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                 Select a chat to start messaging.
@@ -886,7 +885,7 @@ export default function Home() {
                 No messages yet. Start a conversation!
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 mb-4">
                 {chatMessages.map((message) => {
                   const messageReactions =
                     reactions.get(message.id) ?? message.reactions ?? [];
@@ -913,7 +912,7 @@ export default function Home() {
             )}
 
             {activeTypingCount > 0 && (
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 mb-4">
                 {activeTypingCount === 1
                   ? "Someone is typing..."
                   : `${activeTypingCount} people are typing...`}
