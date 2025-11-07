@@ -27,6 +27,14 @@ export function MessageItem({
   onEdit,
   onDelete,
 }: MessageItemProps) {
+  console.log(
+    "MessageItem render for message:",
+    message.id,
+    "type:",
+    message.type,
+    "media_url:",
+    message.media_url
+  );
   const [showReactions, setShowReactions] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -41,6 +49,12 @@ export function MessageItem({
   };
 
   const renderMedia = () => {
+    console.log(
+      "renderMedia called for message:",
+      message.id,
+      message.type,
+      message.media_url
+    );
     if (!message.media_url) return null;
 
     if (message.type === "image") {
@@ -52,6 +66,30 @@ export function MessageItem({
           height={300}
           unoptimized
           className="h-auto max-w-sm rounded-lg"
+        />
+      );
+    }
+
+    if (message.type === "sticker") {
+      // Check if it's an SVG
+      if (message.media_url.endsWith(".svg")) {
+        return (
+          <img
+            src={message.media_url}
+            alt="Sticker"
+            className="h-24 w-24 object-contain"
+            draggable={false}
+          />
+        );
+      }
+      return (
+        <NextImage
+          src={message.media_url}
+          alt="Sticker"
+          width={100}
+          height={100}
+          unoptimized
+          className="h-auto max-w-xs"
         />
       );
     }

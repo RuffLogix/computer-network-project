@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Event, Message, Notification, Reaction } from "@/types";
+import { Event, Message, Notification, Reaction, ReactionType } from "@/types";
 import { WS_BASE_URL, EVENT_TYPES, API_BASE_URL } from "@/constants";
 
 export interface WebSocketHookReturn {
@@ -98,6 +98,7 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
       case EVENT_TYPES.SEND_MESSAGE:
         if (event.data.message) {
           const newMessage = event.data.message as Message;
+          console.log("Received message:", newMessage);
           setMessages((prev) => {
             const exists = prev.some((msg) => msg.id === newMessage.id);
             if (exists) {
@@ -388,6 +389,13 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
       mediaUrl?: string,
       replyToId?: number
     ) => {
+      console.log("Sending message:", {
+        chatId,
+        content,
+        type,
+        mediaUrl,
+        replyToId,
+      });
       sendEvent({
         type: EVENT_TYPES.SEND_MESSAGE,
         data: {
@@ -473,7 +481,7 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
           msgReactions.push({
             id: Date.now(), // Temporary ID
             message_id: messageId,
-            type: type as any,
+            type: type as ReactionType,
             count: 1,
             user_ids: [userId],
             created_at: new Date().toISOString(),

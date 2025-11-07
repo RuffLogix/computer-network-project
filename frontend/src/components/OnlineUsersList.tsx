@@ -1,7 +1,5 @@
 "use client";
 
-import { API_BASE_URL } from "@/constants";
-import { AuthService } from "@/lib/auth";
 import { Users, X } from "lucide-react";
 
 interface OnlineUser {

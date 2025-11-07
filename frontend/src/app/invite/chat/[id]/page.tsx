@@ -71,7 +71,7 @@ export default function ChatInvitePage() {
           setStatus("error");
           setMessage(errorData.error || "Failed to join chat");
         }
-      } catch (error) {
+      } catch {
         setStatus("error");
         setMessage("Network error. Please try again.");
       }
