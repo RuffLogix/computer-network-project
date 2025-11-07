@@ -270,15 +270,17 @@ export default function Home() {
   useEffect(() => {
     if (!isConnected || selectedChatId === null) return;
 
-    if (!joinedRooms.current.has(selectedChatId)) {
-      joinChat(selectedChatId);
-      joinedRooms.current.add(selectedChatId);
+    const currentChatId = selectedChatId; // Capture current value
+
+    if (!joinedRooms.current.has(currentChatId)) {
+      joinChat(currentChatId);
+      joinedRooms.current.add(currentChatId);
     }
 
     return () => {
-      if (selectedChatId !== null && joinedRooms.current.has(selectedChatId)) {
-        leaveChat(selectedChatId);
-        joinedRooms.current.delete(selectedChatId);
+      if (currentChatId !== null && joinedRooms.current.has(currentChatId)) {
+        leaveChat(currentChatId);
+        joinedRooms.current.delete(currentChatId);
       }
     };
   }, [isConnected, selectedChatId, joinChat, leaveChat]);
@@ -333,7 +335,7 @@ export default function Home() {
             if (errorData.error) {
               errorMessage = errorData.error;
             }
-          } catch (e) {
+          } catch (_e) {
             // If we can't parse the error, use the default message
           }
           throw new Error(errorMessage);
