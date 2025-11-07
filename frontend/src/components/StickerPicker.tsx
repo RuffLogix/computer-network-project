@@ -17,8 +17,6 @@ export function StickerPicker({
   const [stickers, setStickers] = useState<string[]>([]);
   const [loadedStickers, setLoadedStickers] = useState<Set<number>>(new Set());
 
-  console.log("StickerPicker render, isOpen:", isOpen, "stickers:", stickers);
-
   useEffect(() => {
     // Load stickers from /stickers folder
     // For now, we'll assume stickers are named sticker1.svg, sticker2.svg, etc.
@@ -28,7 +26,6 @@ export function StickerPicker({
       // Assume up to 10 stickers for demo
       stickerFiles.push(`/stickers/sticker${i}.svg`);
     }
-    console.log("Setting stickers:", stickerFiles);
     setStickers(stickerFiles);
   }, []);
 

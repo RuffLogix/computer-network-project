@@ -27,14 +27,6 @@ export function MessageItem({
   onEdit,
   onDelete,
 }: MessageItemProps) {
-  console.log(
-    "MessageItem render for message:",
-    message.id,
-    "type:",
-    message.type,
-    "media_url:",
-    message.media_url
-  );
   const [showReactions, setShowReactions] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -49,12 +41,6 @@ export function MessageItem({
   };
 
   const renderMedia = () => {
-    console.log(
-      "renderMedia called for message:",
-      message.id,
-      message.type,
-      message.media_url
-    );
     if (!message.media_url) return null;
 
     if (message.type === "image") {

@@ -122,10 +122,6 @@ export function ChatInput({
           <div className="relative">
             <button
               onClick={() => {
-                console.log(
-                  "Sticker button clicked, current state:",
-                  showStickerPicker
-                );
                 setShowStickerPicker(!showStickerPicker);
               }}
               className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"

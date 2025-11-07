@@ -98,7 +98,6 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
       case EVENT_TYPES.SEND_MESSAGE:
         if (event.data.message) {
           const newMessage = event.data.message as Message;
-          console.log("Received message:", newMessage);
           setMessages((prev) => {
             const exists = prev.some((msg) => msg.id === newMessage.id);
             if (exists) {
@@ -389,13 +388,6 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
       mediaUrl?: string,
       replyToId?: number
     ) => {
-      console.log("Sending message:", {
-        chatId,
-        content,
-        type,
-        mediaUrl,
-        replyToId,
-      });
       sendEvent({
         type: EVENT_TYPES.SEND_MESSAGE,
         data: {
