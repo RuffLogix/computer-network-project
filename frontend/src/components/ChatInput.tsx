@@ -91,7 +91,6 @@ export function ChatInput({
   };
 
   const handleStickerSelect = (stickerUrl: string) => {
-    console.log("Sending sticker:", stickerUrl);
     onSendMessage("", "sticker", stickerUrl);
   };
 
