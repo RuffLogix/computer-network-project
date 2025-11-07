@@ -186,6 +186,8 @@ func (h *implWSHandler) handleSendMessage(event *entity.Event) {
 	msgType, _ := event.Data["type"].(string)
 	mediaURL, _ := event.Data["media_url"].(string)
 
+	log.Printf("Backend received message: chatID=%v, content=%v, type=%v, mediaURL=%v", chatID, content, msgType, mediaURL)
+
 	var replyToID *int64
 	if replyTo, ok := event.Data["reply_to_id"].(float64); ok {
 		replyID := int64(replyTo)
