@@ -74,7 +74,6 @@ export function StickerPicker({
                     className="w-10 h-10 object-contain"
                     onLoad={() => handleStickerLoad(index)}
                     onError={(e) => {
-                      console.log("Failed to load sticker:", sticker);
                       handleStickerError(index);
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
