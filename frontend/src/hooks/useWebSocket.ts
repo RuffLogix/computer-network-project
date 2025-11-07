@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Event, Message, Notification, Reaction } from "@/types";
+import { Event, Message, Notification, Reaction, ReactionType } from "@/types";
 import { WS_BASE_URL, EVENT_TYPES, API_BASE_URL } from "@/constants";
 
 export interface WebSocketHookReturn {
@@ -473,7 +473,7 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
           msgReactions.push({
             id: Date.now(), // Temporary ID
             message_id: messageId,
-            type: type as any,
+            type: type as ReactionType,
             count: 1,
             user_ids: [userId],
             created_at: new Date().toISOString(),

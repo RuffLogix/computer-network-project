@@ -12,7 +12,7 @@ import { CreateChatModal } from "@/components/CreateChatModal";
 import { FriendsList, Friend } from "@/components/FriendsList";
 import { OnlineUsersList } from "@/components/OnlineUsersList";
 import { AllChatsList } from "@/components/AllChatsList";
-import { Chat, Message } from "@/types";
+import { Chat, Message, User } from "@/types";
 import { API_BASE_URL } from "@/constants";
 import { Bell, Users, Plus, Hash, LogOut, UserPlus, Globe } from "lucide-react";
 import { AuthService } from "@/lib/auth";
@@ -31,13 +31,11 @@ const DEFAULT_INVITE_EXPIRY_SECONDS = 7 * 24 * 60 * 60;
 export default function Home() {
   const router = useRouter();
   const [userId, setUserId] = useState(0);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [showCreateChatModal, setShowCreateChatModal] = useState(false);
   const joinedRooms = useRef<Set<number>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-
   // Check authentication on mount
   useEffect(() => {
     if (!AuthService.isAuthenticated()) {
@@ -62,7 +60,7 @@ export default function Home() {
   const [showAllChatsList, setShowAllChatsList] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
-  const [onlineUsersDetails, setOnlineUsersDetails] = useState<any[]>([]);
+  const [onlineUsersDetails, setOnlineUsersDetails] = useState<User[]>([]);
   const [friendAddMethod, setFriendAddMethod] = useState<"direct" | "link">(
     "direct"
   );
@@ -875,7 +873,7 @@ export default function Home() {
               })()}
             </div>
           )}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 pb-4">
             {selectedChatId === null ? (
               <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                 Select a chat to start messaging.
@@ -885,7 +883,7 @@ export default function Home() {
                 No messages yet. Start a conversation!
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 mb-4">
                 {chatMessages.map((message) => {
                   const messageReactions =
                     reactions.get(message.id) ?? message.reactions ?? [];
@@ -912,7 +910,7 @@ export default function Home() {
             )}
 
             {activeTypingCount > 0 && (
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 mb-4">
                 {activeTypingCount === 1
                   ? "Someone is typing..."
                   : `${activeTypingCount} people are typing...`}
