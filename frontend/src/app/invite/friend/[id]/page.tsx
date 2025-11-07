@@ -72,6 +72,7 @@ export default function FriendInvitePage() {
           setMessage(errorData.error || "Failed to accept invitation");
         }
       } catch (error) {
+        console.error("Error accepting invitation:", error);
         setStatus("error");
         setMessage("Network error. Please try again.");
       }

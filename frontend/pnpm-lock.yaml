@@ -54,6 +54,9 @@ importers:
       eslint-config-next:
         specifier: 15.5.5
         version: 15.5.5(eslint@9.37.0(jiti@2.6.1))(typescript@5.9.3)
+      eslint-formatter-compact:
+        specifier: ^9.0.1
+        version: 9.0.1
       tailwindcss:
         specifier: ^4
         version: 4.1.14
@@ -893,6 +896,10 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  eslint-formatter-compact@9.0.1:
+    resolution: {integrity: sha512-mBAti2tb403dQGMyilQTYHU80stem3N7jdtKW+tmn5gj3JNF7ki0rgCZtJFw4iMayTH862FTUIqCdp70ug0S0Q==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   eslint-import-resolver-node@0.3.9:
     resolution: {integrity: sha512-WFj2isz22JahUv+B788TlO3N6zL3nNJGU8CcZbPZvVEkBPaJdCV4vy5wyghty5ROFbCRnm132v8BScu5/1BQ8g==}
@@ -2727,6 +2734,8 @@ snapshots:
       - eslint-import-resolver-webpack
       - eslint-plugin-import-x
       - supports-color
+
+  eslint-formatter-compact@9.0.1: {}
 
   eslint-import-resolver-node@0.3.9:
     dependencies:

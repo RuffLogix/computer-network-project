@@ -72,6 +72,7 @@ export default function ChatInvitePage() {
           setMessage(errorData.error || "Failed to join chat");
         }
       } catch (error) {
+        console.error("Error joining chat:", error);
         setStatus("error");
         setMessage("Network error. Please try again.");
       }

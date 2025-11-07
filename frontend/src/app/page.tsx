@@ -12,7 +12,7 @@ import { CreateChatModal } from "@/components/CreateChatModal";
 import { FriendsList, Friend } from "@/components/FriendsList";
 import { OnlineUsersList } from "@/components/OnlineUsersList";
 import { AllChatsList } from "@/components/AllChatsList";
-import { Chat, Message } from "@/types";
+import { Chat, Message, User } from "@/types";
 import { API_BASE_URL } from "@/constants";
 import { Bell, Users, Plus, Hash, LogOut, UserPlus, Globe } from "lucide-react";
 import { AuthService } from "@/lib/auth";
@@ -31,12 +31,11 @@ const DEFAULT_INVITE_EXPIRY_SECONDS = 7 * 24 * 60 * 60;
 export default function Home() {
   const router = useRouter();
   const [userId, setUserId] = useState(0);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [showCreateChatModal, setShowCreateChatModal] = useState(false);
   const joinedRooms = useRef<Set<number>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Check authentication on mount
   useEffect(() => {
@@ -62,7 +61,7 @@ export default function Home() {
   const [showAllChatsList, setShowAllChatsList] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
-  const [onlineUsersDetails, setOnlineUsersDetails] = useState<any[]>([]);
+  const [onlineUsersDetails, setOnlineUsersDetails] = useState<User[]>([]);
   const [friendAddMethod, setFriendAddMethod] = useState<"direct" | "link">(
     "direct"
   );
@@ -272,15 +271,17 @@ export default function Home() {
   useEffect(() => {
     if (!isConnected || selectedChatId === null) return;
 
-    if (!joinedRooms.current.has(selectedChatId)) {
-      joinChat(selectedChatId);
-      joinedRooms.current.add(selectedChatId);
+    const currentChatId = selectedChatId; // Capture current value
+
+    if (!joinedRooms.current.has(currentChatId)) {
+      joinChat(currentChatId);
+      joinedRooms.current.add(currentChatId);
     }
 
     return () => {
-      if (selectedChatId !== null && joinedRooms.current.has(selectedChatId)) {
-        leaveChat(selectedChatId);
-        joinedRooms.current.delete(selectedChatId);
+      if (currentChatId !== null && joinedRooms.current.has(currentChatId)) {
+        leaveChat(currentChatId);
+        joinedRooms.current.delete(currentChatId);
       }
     };
   }, [isConnected, selectedChatId, joinChat, leaveChat]);
@@ -335,7 +336,7 @@ export default function Home() {
             if (errorData.error) {
               errorMessage = errorData.error;
             }
-          } catch (e) {
+          } catch (_e) {
             // If we can't parse the error, use the default message
           }
           throw new Error(errorMessage);

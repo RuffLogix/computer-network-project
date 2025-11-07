@@ -34,3 +34,13 @@ To run the frontend application, navigate to the `frontend` directory and execut
 ```bash
 cd frontend && pnpm run dev
 ```
+
+## Docker Compose
+
+You can also run the entire application using Docker Compose. Make sure you have Docker and Docker Compose installed, then run:
+
+```bash
+docker-compose up --build
+```
+
+This will start both the backend and frontend services along with a MongoDB database.
