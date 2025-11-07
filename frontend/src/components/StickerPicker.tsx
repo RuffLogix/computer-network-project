@@ -53,7 +53,6 @@ export function StickerPicker({
               key={index}
               onClick={() => {
                 if (!isLoaded) return; // Prevent clicking empty slots
-                console.log("Sticker selected:", sticker);
                 onSelectSticker(sticker);
                 onClose();
               }}
@@ -72,7 +71,6 @@ export function StickerPicker({
                     className="w-10 h-10 object-contain"
                     onLoad={() => handleStickerLoad(index)}
                     onError={(e) => {
-                      console.log("Failed to load sticker:", sticker);
                       handleStickerError(index);
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
@@ -87,7 +85,6 @@ export function StickerPicker({
                     className="w-10 h-10 object-contain"
                     onLoad={() => handleStickerLoad(index)}
                     onError={(e) => {
-                      console.log("Failed to load sticker:", sticker);
                       handleStickerError(index);
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
