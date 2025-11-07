@@ -56,7 +56,6 @@ export function StickerPicker({
               key={index}
               onClick={() => {
                 if (!isLoaded) return; // Prevent clicking empty slots
-                console.log("Sticker selected:", sticker);
                 onSelectSticker(sticker);
                 onClose();
               }}
