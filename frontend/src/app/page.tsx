@@ -35,7 +35,8 @@ export default function Home() {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [showCreateChatModal, setShowCreateChatModal] = useState(false);
   const joinedRooms = useRef<Set<number>>(new Set());
-  const messagesEndRef = useRef<HTMLDivElement>(null); // Check authentication on mount
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Check authentication on mount
   useEffect(() => {
     if (!AuthService.isAuthenticated()) {
       router.push("/login");
