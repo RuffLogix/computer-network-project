@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { User } from "@/types";
 import { Users, X } from "lucide-react";
 
@@ -13,6 +14,7 @@ interface FriendsListProps {
 }
 
 export function FriendsList({ friends, onClose }: FriendsListProps) {
+  const t = useTranslations();
   console.log("FriendsList rendering with friends:", friends);
   const onlineFriends = friends.filter((f) => f.is_online);
   const offlineFriends = friends.filter((f) => !f.is_online);
@@ -30,7 +32,7 @@ export function FriendsList({ friends, onClose }: FriendsListProps) {
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            <h2 className="text-xl font-bold">Friends</h2>
+            <h2 className="text-xl font-bold">{t("friends.title")}</h2>
             <span className="text-sm text-gray-500 dark:text-gray-400">
               ({friends.length})
             </span>
@@ -48,8 +50,8 @@ export function FriendsList({ friends, onClose }: FriendsListProps) {
           {friends.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No friends yet</p>
-              <p className="text-sm mt-1">Add friends to see them here</p>
+              <p>{t("friends.noFriends")}</p>
+              <p className="text-sm mt-1">{t("friends.addFriend")}</p>
             </div>
           ) : (
             <div className="space-y-4">

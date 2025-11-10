@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Users, X } from "lucide-react";
 
 interface OnlineUser {
@@ -17,6 +18,7 @@ export function OnlineUsersList({
   onlineUsers,
   onClose,
 }: OnlineUsersListProps) {
+  const t = useTranslations();
   console.log("OnlineUsersList rendering with onlineUsers:", onlineUsers);
 
   return (
@@ -26,7 +28,7 @@ export function OnlineUsersList({
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            <h2 className="text-xl font-bold">Online Users</h2>
+            <h2 className="text-xl font-bold">{t("friends.onlineUsers")}</h2>
             <span className="text-sm text-gray-500 dark:text-gray-400">
               ({onlineUsers.length})
             </span>
@@ -44,7 +46,7 @@ export function OnlineUsersList({
           {onlineUsers.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No users online</p>
+              <p>{t("friends.noFriends")}</p>
             </div>
           ) : (
             <div className="space-y-2">

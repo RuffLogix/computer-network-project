@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { API_BASE_URL } from "@/constants";
 import { AuthService } from "@/lib/auth";
 
-export default function ChatInvitePage() {
+export default function FriendInvitePage() {
   const router = useRouter();
   const params = useParams();
+  const locale = useLocale();
+  const t = useTranslations();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
@@ -21,7 +24,7 @@ export default function ChatInvitePage() {
   useEffect(() => {
     if (!isMounted) return;
 
-    const joinChat = async () => {
+    const acceptInvitation = async () => {
       const code = params.id as string;
       if (!code) {
         setStatus("error");
@@ -33,16 +36,18 @@ export default function ChatInvitePage() {
         if (!AuthService.isAuthenticated()) {
           setStatus("error");
           setMessage(
-            "You need to log in to join this chat. Redirecting to login..."
+            "You need to log in to accept this invitation. Redirecting to login..."
           );
           router.push(
-            `/login?redirect=${encodeURIComponent(`/invite/chat/${code}`)}`
+            `/${locale}/login?redirect=${encodeURIComponent(
+              `/invite/friend/${code}`
+            )}`
           );
           return;
         }
 
         const response = await fetch(
-          `${API_BASE_URL}/api/invitations/chat/${code}/join`,
+          `${API_BASE_URL}/api/invitations/friend/${code}/accept`,
           {
             method: "POST",
             headers: {
@@ -54,32 +59,34 @@ export default function ChatInvitePage() {
 
         if (response.status === 401) {
           router.push(
-            `/login?redirect=${encodeURIComponent(`/invite/chat/${code}`)}`
+            `/${locale}/login?redirect=${encodeURIComponent(
+              `/invite/friend/${code}`
+            )}`
           );
           return;
         }
 
         if (response.ok) {
           setStatus("success");
-          setMessage("Successfully joined the chat!");
+          setMessage("Friend invitation accepted successfully!");
           // Redirect to main page after 2 seconds
           setTimeout(() => {
-            router.push("/");
+            router.push(`/${locale}`);
           }, 2000);
         } else {
           const errorData = await response.json().catch(() => ({}));
           setStatus("error");
-          setMessage(errorData.error || "Failed to join chat");
+          setMessage(errorData.error || "Failed to accept invitation");
         }
       } catch (error) {
-        console.error("Error joining chat:", error);
+        console.error("Error accepting invitation:", error);
         setStatus("error");
         setMessage("Network error. Please try again.");
       }
     };
 
-    joinChat();
-  }, [params.id, router, isMounted]);
+    acceptInvitation();
+  }, [params.id, router, isMounted, locale]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -89,10 +96,10 @@ export default function ChatInvitePage() {
             <>
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Joining Chat
+                Accepting Invitation
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Please wait while we add you to the chat...
+                Please wait while we process your friend invitation...
               </p>
             </>
           )}
@@ -115,7 +122,7 @@ export default function ChatInvitePage() {
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Welcome to the Chat!
+                Invitation Accepted!
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">{message}</p>
               <p className="text-sm text-gray-500 dark:text-gray-500">
@@ -142,7 +149,7 @@ export default function ChatInvitePage() {
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Failed to Join Chat
+                Invitation Failed
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">{message}</p>
               <button
