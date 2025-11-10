@@ -2,7 +2,15 @@
 
 import NextImage from "next/image";
 import { useState } from "react";
-import { Reply, Smile, MoreVertical, Edit, Trash } from "lucide-react";
+import {
+  Reply,
+  Smile,
+  MoreVertical,
+  Edit,
+  Trash,
+  Download,
+  FileText,
+} from "lucide-react";
 import { API_BASE_URL, REACTION_EMOJIS } from "@/constants";
 import { Message, Reaction } from "@/types";
 
@@ -38,6 +46,53 @@ export function MessageItem({
     }
     onEdit?.(message.id, editContent);
     setIsEditing(false);
+  };
+
+  const formatFileSize = (bytes?: number): string => {
+    if (!bytes || bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  };
+
+  const getFileIcon = (fileName?: string) => {
+    if (!fileName) return <FileText className="w-8 h-8" />;
+    const ext = fileName.split(".").pop()?.toLowerCase();
+    const iconMap: Record<string, string> = {
+      pdf: "📄",
+      doc: "📘",
+      docx: "📘",
+      xls: "📗",
+      xlsx: "📗",
+      ppt: "📙",
+      pptx: "📙",
+      txt: "📝",
+      zip: "🗜️",
+      rar: "🗜️",
+      "7z": "🗜️",
+    };
+    return iconMap[ext || ""] || <FileText className="w-8 h-8" />;
+  };
+
+  const handleDownload = async () => {
+    if (!message.media_url) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${message.media_url}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = message.file_name || "download";
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file");
+    }
   };
 
   const renderMedia = () => {
@@ -83,10 +138,33 @@ export function MessageItem({
     if (message.type === "video") {
       return (
         <video
-          src={message.media_url}
+          src={`${API_BASE_URL}${message.media_url}`}
           controls
           className="max-w-sm rounded-lg"
         />
+      );
+    }
+
+    if (message.type === "file") {
+      return (
+        <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-600 max-w-sm">
+          <div className="text-4xl">{getFileIcon(message.file_name)}</div>
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-sm truncate">
+              {message.file_name || "Unknown file"}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {formatFileSize(message.file_size)}
+            </div>
+          </div>
+          <button
+            onClick={handleDownload}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            title="Download file"
+          >
+            <Download className="w-5 h-5" />
+          </button>
+        </div>
       );
     }
 

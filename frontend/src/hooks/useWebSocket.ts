@@ -13,7 +13,9 @@ export interface WebSocketHookReturn {
     content: string,
     type?: string,
     mediaUrl?: string,
-    replyToId?: number
+    replyToId?: number,
+    fileName?: string,
+    fileSize?: number
   ) => void;
   editMessage: (messageId: number, content: string, chatId: number) => void;
   deleteMessage: (messageId: number, chatId: number) => void;
@@ -386,7 +388,9 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
       content: string,
       type: string = "text",
       mediaUrl?: string,
-      replyToId?: number
+      replyToId?: number,
+      fileName?: string,
+      fileSize?: number
     ) => {
       sendEvent({
         type: EVENT_TYPES.SEND_MESSAGE,
@@ -396,6 +400,8 @@ export function useWebSocket(userId: number): WebSocketHookReturn {
           type,
           media_url: mediaUrl,
           reply_to_id: replyToId,
+          file_name: fileName,
+          file_size: fileSize,
         },
         created_by: userId,
       });

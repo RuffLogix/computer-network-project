@@ -286,9 +286,24 @@ export default function Home() {
   }, [isConnected, selectedChatId, joinChat, leaveChat]);
 
   const handleSendMessage = useCallback(
-    (content: string, type?: string, mediaUrl?: string, replyToId?: number) => {
+    (
+      content: string,
+      type?: string,
+      mediaUrl?: string,
+      replyToId?: number,
+      fileName?: string,
+      fileSize?: number
+    ) => {
       if (!selectedChatId) return;
-      sendMessage(selectedChatId, content, type, mediaUrl, replyToId);
+      sendMessage(
+        selectedChatId,
+        content,
+        type,
+        mediaUrl,
+        replyToId,
+        fileName,
+        fileSize
+      );
       setReplyTo(null);
       // Scroll to bottom when sending a message
       setTimeout(() => {

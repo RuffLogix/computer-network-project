@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, X, Smile } from "lucide-react";
+import { Send, X, Smile, FileText } from "lucide-react";
 import { MediaUpload } from "./MediaUpload";
+import { FileUpload } from "./FileUpload";
 import { StickerPicker } from "./StickerPicker";
 import { Message } from "@/types";
 
@@ -12,7 +13,9 @@ interface ChatInputProps {
     content: string,
     type?: string,
     mediaUrl?: string,
-    replyToId?: number
+    replyToId?: number,
+    fileName?: string,
+    fileSize?: number
   ) => void;
   onTyping: (isTyping: boolean) => void;
   replyTo?: Message | null;
@@ -28,9 +31,12 @@ export function ChatInput({
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [mediaUrl, setMediaUrl] = useState<string>("");
+  const [mediaPreview, setMediaPreview] = useState<string>("");
   const [mediaType, setMediaType] = useState<
-    "image" | "video" | "sticker" | "text"
+    "image" | "video" | "sticker" | "file" | "text"
   >("text");
+  const [fileName, setFileName] = useState<string>("");
+  const [fileSize, setFileSize] = useState<number>(0);
   const [showStickerPicker, setShowStickerPicker] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,18 +62,24 @@ export function ChatInput({
   };
 
   const handleSend = () => {
+    // Allow sending if there's a message OR media (including files)
     if (!message.trim() && !mediaUrl) return;
 
     onSendMessage(
       message,
       mediaUrl ? mediaType : "text",
       mediaUrl || undefined,
-      replyTo?.id
+      replyTo?.id,
+      fileName || undefined,
+      fileSize || undefined
     );
 
     setMessage("");
     setMediaUrl("");
+    setMediaPreview("");
     setMediaType("text");
+    setFileName("");
+    setFileSize(0);
     onTyping(false);
 
     if (onCancelReply) {
@@ -84,14 +96,39 @@ export function ChatInput({
 
   const handleMediaUpload = (
     url: string,
-    type: "image" | "video" | "sticker"
+    type: "image" | "video" | "sticker",
+    preview?: string
   ) => {
     setMediaUrl(url);
     setMediaType(type);
+    setMediaPreview(preview || url);
+  };
+
+  const handleFileUpload = (url: string, name: string, size: number) => {
+    setMediaUrl(url);
+    setMediaType("file");
+    setFileName(name);
+    setFileSize(size);
   };
 
   const handleStickerSelect = (stickerUrl: string) => {
     onSendMessage("", "sticker", stickerUrl);
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  };
+
+  const clearAttachment = () => {
+    setMediaUrl("");
+    setMediaPreview("");
+    setMediaType("text");
+    setFileName("");
+    setFileSize(0);
   };
 
   return (
@@ -115,9 +152,83 @@ export function ChatInput({
         </div>
       )}
 
+      {mediaUrl && (
+        <div className="mb-2">
+          <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 min-w-0 flex-1">
+                {mediaType === "image" && (
+                  <>
+                    <span className="text-xl flex-shrink-0">📷</span>
+                    <span className="truncate">Image attached</span>
+                  </>
+                )}
+                {mediaType === "video" && (
+                  <>
+                    <span className="text-xl flex-shrink-0">🎥</span>
+                    <span className="truncate">Video attached</span>
+                  </>
+                )}
+                {mediaType === "file" && (
+                  <>
+                    <FileText className="w-4 h-4 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="font-medium text-xs truncate">
+                        {fileName}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-500">
+                        {formatFileSize(fileSize)}
+                      </span>
+                    </div>
+                  </>
+                )}
+                {mediaType === "sticker" && (
+                  <>
+                    <span className="text-xl flex-shrink-0">😊</span>
+                    <span className="truncate">Sticker attached</span>
+                  </>
+                )}
+              </div>
+              <button
+                onClick={clearAttachment}
+                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors flex-shrink-0"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+            {(mediaType === "image" || mediaType === "video") &&
+              mediaPreview && (
+                <div className="mt-2">
+                  {mediaType === "image" && (
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="max-h-32 w-auto rounded border border-gray-300 dark:border-gray-600 object-contain"
+                      onError={(e) => {
+                        console.error("Image failed to load:", mediaPreview);
+                      }}
+                    />
+                  )}
+                  {mediaType === "video" && (
+                    <video
+                      src={mediaPreview}
+                      controls
+                      className="max-h-32 w-auto rounded border border-gray-300 dark:border-gray-600"
+                      onError={(e) => {
+                        console.error("Video failed to load:", mediaPreview);
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-end gap-2">
         <div className="flex items-center gap-1">
           <MediaUpload userId={userId} onUpload={handleMediaUpload} />
+          <FileUpload userId={userId} onUpload={handleFileUpload} />
           <div className="relative">
             <button
               onClick={() => {
@@ -156,13 +267,6 @@ export function ChatInput({
           <Send className="w-5 h-5" />
         </button>
       </div>
-
-      {mediaUrl && (
-        <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {mediaType === "image" ? "📷" : mediaType === "video" ? "🎥" : "😊"}{" "}
-          {mediaType === "sticker" ? "Sticker attached" : "Media attached"}
-        </div>
-      )}
     </div>
   );
 }
