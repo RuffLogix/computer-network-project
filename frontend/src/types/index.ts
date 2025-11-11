@@ -1,5 +1,11 @@
 export type ChatType = "individual" | "private_group" | "public_group";
-export type MessageType = "text" | "image" | "video" | "sticker" | "system";
+export type MessageType =
+  | "text"
+  | "image"
+  | "video"
+  | "sticker"
+  | "file"
+  | "system";
 export type ReactionType = "like" | "love" | "laugh" | "wow" | "sad" | "angry";
 export type FriendshipStatus = "pending" | "accepted" | "rejected" | "blocked";
 export type NotificationType =
@@ -45,6 +51,8 @@ export interface Message {
   content: string;
   type: MessageType;
   media_url?: string;
+  file_name?: string;
+  file_size?: number;
   reply_to_id?: number;
   reply_to?: Message;
   reactions?: Reaction[];

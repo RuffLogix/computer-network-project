@@ -28,6 +28,7 @@ const (
 	Image   MessageType = "image"
 	Video   MessageType = "video"
 	Sticker MessageType = "sticker"
+	File    MessageType = "file"
 	System  MessageType = "system"
 )
 
@@ -37,6 +38,8 @@ type Message struct {
 	Content       string      `bson:"content" json:"content"`
 	Type          MessageType `bson:"type" json:"type"`
 	MediaURL      string      `bson:"media_url,omitempty" json:"media_url,omitempty"`
+	FileName      string      `bson:"file_name,omitempty" json:"file_name,omitempty"`
+	FileSize      int64       `bson:"file_size,omitempty" json:"file_size,omitempty"`
 	ReplyToID     *int64      `bson:"reply_to_id,omitempty" json:"reply_to_id,omitempty"`
 	ReplyTo       *Message    `bson:"-" json:"reply_to,omitempty"`
 	Reactions     []*Reaction `bson:"-" json:"reactions,omitempty"`

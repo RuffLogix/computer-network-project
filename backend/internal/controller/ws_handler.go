@@ -185,6 +185,8 @@ func (h *implWSHandler) handleSendMessage(event *entity.Event) {
 	content, _ := event.Data["content"].(string)
 	msgType, _ := event.Data["type"].(string)
 	mediaURL, _ := event.Data["media_url"].(string)
+	fileName, _ := event.Data["file_name"].(string)
+	fileSize, _ := event.Data["file_size"].(float64)
 
 	var replyToID *int64
 	if replyTo, ok := event.Data["reply_to_id"].(float64); ok {
@@ -197,6 +199,8 @@ func (h *implWSHandler) handleSendMessage(event *entity.Event) {
 		Content:   content,
 		Type:      entity.MessageType(msgType),
 		MediaURL:  mediaURL,
+		FileName:  fileName,
+		FileSize:  int64(fileSize),
 		ReplyToID: replyToID,
 		CreatedBy: event.CreatedBy,
 	}

@@ -197,6 +197,8 @@ func (h *implHTTPHandler) sendMessage(c *gin.Context) {
 		Content   string `json:"content"`
 		Type      string `json:"type" binding:"required"`
 		MediaURL  string `json:"media_url"`
+		FileName  string `json:"file_name"`
+		FileSize  int64  `json:"file_size"`
 		ReplyToID *int64 `json:"reply_to_id"`
 	}
 
@@ -212,6 +214,8 @@ func (h *implHTTPHandler) sendMessage(c *gin.Context) {
 		Content:   req.Content,
 		Type:      entity.MessageType(req.Type),
 		MediaURL:  req.MediaURL,
+		FileName:  req.FileName,
+		FileSize:  req.FileSize,
 		ReplyToID: req.ReplyToID,
 		CreatedBy: userID,
 	}
@@ -854,10 +858,11 @@ func (h *implHTTPHandler) uploadMedia(c *gin.Context) {
 		return
 	}
 
-	// Return the file URL
+	// Return the file URL with metadata
 	c.JSON(http.StatusOK, gin.H{
-		"url":      "/uploads/" + filename,
-		"filename": file.Filename,
+		"url":       "/uploads/" + filename,
+		"filename":  file.Filename,
+		"file_size": file.Size,
 	})
 }
 

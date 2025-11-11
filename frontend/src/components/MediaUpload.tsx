@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { Image as ImageIcon, X, Upload } from "lucide-react";
 import {
   MAX_FILE_SIZE,
+  MAX_MEDIA_SIZE,
   ALLOWED_IMAGE_TYPES,
   ALLOWED_VIDEO_TYPES,
   API_BASE_URL,
@@ -12,7 +13,7 @@ import {
 
 interface MediaUploadProps {
   userId: number;
-  onUpload: (url: string, type: "image" | "video") => void;
+  onUpload: (url: string, type: "image" | "video", preview?: string) => void;
 }
 
 export function MediaUpload({ onUpload, userId }: MediaUploadProps) {
@@ -25,11 +26,6 @@ export function MediaUpload({ onUpload, userId }: MediaUploadProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > MAX_FILE_SIZE) {
-      alert("File size must be less than 10MB");
-      return;
-    }
-
     const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
     const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
 
@@ -38,44 +34,65 @@ export function MediaUpload({ onUpload, userId }: MediaUploadProps) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string);
-      setFileType(isImage ? "image" : "video");
-    };
-    reader.readAsDataURL(file);
+    const maxSize = isVideo ? MAX_MEDIA_SIZE : MAX_FILE_SIZE;
+    if (file.size > maxSize) {
+      alert(`File size must be less than ${isVideo ? "50MB" : "10MB"}`);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
 
-    try {
-      const token = localStorage.getItem("auth_token");
-      const response = await fetch(`${API_BASE_URL}/api/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: token ? `Bearer ${token}` : "",
-          "X-User-ID": String(userId),
-        },
-        body: formData,
-      });
+    // Create local preview first
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const previewUrl = e.target?.result as string;
+      setPreview(previewUrl);
+      setFileType(isImage ? "image" : "video");
 
-      if (!response.ok) {
-        throw new Error("Upload failed");
+      // Now upload to server
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const token = localStorage.getItem("auth_token");
+        const response = await fetch(`${API_BASE_URL}/api/upload`, {
+          method: "POST",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+            "X-User-ID": String(userId),
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Upload failed");
+        }
+
+        const data = await response.json();
+        if (data.url) {
+          // Pass both server URL and preview
+          onUpload(data.url, isImage ? "image" : "video", previewUrl);
+          setPreview(null);
+          setFileType(null);
+        } else {
+          throw new Error("Malformed upload response");
+        }
+      } catch (error) {
+        console.error("Upload failed:", error);
+        alert("Failed to upload file");
+        setPreview(null);
+        setFileType(null);
+      } finally {
+        setUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
-
-      const data = await response.json();
-      if (data.url) {
-        onUpload(data.url, isImage ? "image" : "video");
-      } else {
-        throw new Error("Malformed upload response");
-      }
-    } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Failed to upload file");
-    } finally {
-      setUploading(false);
-    }
+    };
+    reader.readAsDataURL(file);
   };
 
   const clearPreview = () => {
@@ -88,55 +105,26 @@ export function MediaUpload({ onUpload, userId }: MediaUploadProps) {
 
   return (
     <div className="relative">
-      {preview ? (
-        <div className="relative inline-block">
-          {fileType === "image" && (
-            <NextImage
-              src={preview}
-              alt="Preview"
-              width={320}
-              height={240}
-              unoptimized
-              className="h-auto max-w-xs rounded-lg"
-            />
-          )}
-          {fileType === "video" && (
-            <video
-              src={preview}
-              controls
-              className="max-w-xs max-h-48 rounded-lg"
-            />
-          )}
-          <button
-            onClick={clearPreview}
-            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={[...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES].join(",")}
-            onChange={handleFileSelect}
-            className="hidden"
-            disabled={uploading}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-            disabled={uploading}
-          >
-            {uploading ? (
-              <Upload className="w-5 h-5 animate-pulse" />
-            ) : (
-              <ImageIcon className="w-5 h-5" />
-            )}
-          </button>
-        </div>
-      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={[...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES].join(",")}
+        onChange={handleFileSelect}
+        className="hidden"
+        disabled={uploading}
+      />
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        disabled={uploading}
+        title="Upload image or video"
+      >
+        {uploading ? (
+          <Upload className="w-5 h-5 animate-pulse" />
+        ) : (
+          <ImageIcon className="w-5 h-5" />
+        )}
+      </button>
     </div>
   );
 }

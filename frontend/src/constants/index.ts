@@ -18,6 +18,7 @@ export const MESSAGE_TYPES = {
   TEXT: "text",
   IMAGE: "image",
   VIDEO: "video",
+  FILE: "file",
 } as const;
 
 export const CHAT_TYPES = {
@@ -54,6 +55,7 @@ export const NOTIFICATION_TYPES = {
 } as const;
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+export const MAX_MEDIA_SIZE = 50 * 1024 * 1024; // 50MB for video
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -65,4 +67,18 @@ export const ALLOWED_VIDEO_TYPES = [
   "video/webm",
   "video/ogg",
   "video/quicktime",
+];
+export const ALLOWED_FILE_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain",
+  "application/zip",
+  "application/x-zip-compressed",
+  "application/x-rar-compressed",
+  "application/x-7z-compressed",
 ];
