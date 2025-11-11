@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { AuthService } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 export function LoginForm() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +34,7 @@ export function LoginForm() {
       } else {
         await AuthService.register(formData);
       }
-      router.push("/");
+      router.push(`/${locale}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
@@ -46,7 +49,7 @@ export function LoginForm() {
 
     try {
       await AuthService.createGuest("Guest User");
-      router.push("/");
+      router.push(`/${locale}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Guest login failed");
@@ -58,7 +61,7 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">
-        {isLogin ? "Login" : "Register"}
+        {isLogin ? t("auth.login") : t("auth.register")}
       </h2>
 
       {error && (
@@ -84,7 +87,9 @@ export function LoginForm() {
         )}
 
         <div>
-          <label className="block text-sm font-medium mb-1">Username</label>
+          <label className="block text-sm font-medium mb-1">
+            {t("auth.username")}
+          </label>
           <input
             type="text"
             value={formData.username}
@@ -112,7 +117,9 @@ export function LoginForm() {
         )}
 
         <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
+          <label className="block text-sm font-medium mb-1">
+            {t("auth.password")}
+          </label>
           <input
             type="password"
             value={formData.password}
@@ -130,7 +137,11 @@ export function LoginForm() {
           disabled={loading}
           className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Loading..." : isLogin ? "Login" : "Register"}
+          {loading
+            ? t("common.loading")
+            : isLogin
+            ? t("auth.loginButton")
+            : t("auth.registerButton")}
         </button>
       </form>
 
@@ -149,7 +160,7 @@ export function LoginForm() {
           disabled={loading}
           className="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Loading..." : "Continue as Guest"}
+          {loading ? t("common.loading") : "Continue as Guest"}
         </button>
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
           Guests can only access public chats

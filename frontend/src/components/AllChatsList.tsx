@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { API_BASE_URL } from "@/constants";
 import { AuthService } from "@/lib/auth";
 import { Hash, Users, X, Lock, Globe } from "lucide-react";
@@ -32,6 +33,7 @@ interface AllChatsListProps {
 }
 
 export function AllChatsList({ onClose, onChatSelect }: AllChatsListProps) {
+  const t = useTranslations();
   const [chats, setChats] = useState<ChatWithMembers[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +87,7 @@ export function AllChatsList({ onClose, onChatSelect }: AllChatsListProps) {
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <Hash className="w-5 h-5" />
-            <h2 className="text-xl font-bold">All Chat Groups</h2>
+            <h2 className="text-xl font-bold">{t("chat.allChats")}</h2>
             <span className="text-sm text-gray-500 dark:text-gray-400">
               ({chats.length})
             </span>
