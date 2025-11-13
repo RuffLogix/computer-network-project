@@ -1,7 +1,7 @@
 import { AuthResponse } from "@/types";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export class AuthService {
   private static readonly TOKEN_KEY = "auth_token";
@@ -13,7 +13,7 @@ export class AuthService {
     name: string;
     email: string;
   }): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export class AuthService {
     username: string;
     password: string;
   }): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export class AuthService {
   }
 
   static async createGuest(name: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/guest`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/guest`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
