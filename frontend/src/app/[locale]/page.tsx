@@ -51,7 +51,7 @@ export default function Home() {
     // Use numeric_id for chat operations
     setUserId(user?.numeric_id || 0);
     setIsAuthReady(true);
-  }, [router]);
+  }, [router, locale]);
   const [chats, setChats] = useState<Chat[]>([]);
   const [publicChats, setPublicChats] = useState<Chat[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
@@ -275,16 +275,17 @@ export default function Home() {
     if (!isConnected || selectedChatId === null) return;
 
     const currentChatId = selectedChatId; // Capture current value
+    const rooms = joinedRooms.current; // Capture ref value for cleanup
 
-    if (!joinedRooms.current.has(currentChatId)) {
+    if (!rooms.has(currentChatId)) {
       joinChat(currentChatId);
-      joinedRooms.current.add(currentChatId);
+      rooms.add(currentChatId);
     }
 
     return () => {
-      if (currentChatId !== null && joinedRooms.current.has(currentChatId)) {
+      if (currentChatId !== null && rooms.has(currentChatId)) {
         leaveChat(currentChatId);
-        joinedRooms.current.delete(currentChatId);
+        rooms.delete(currentChatId);
       }
     };
   }, [isConnected, selectedChatId, joinChat, leaveChat]);
@@ -354,7 +355,7 @@ export default function Home() {
             if (errorData.error) {
               errorMessage = errorData.error;
             }
-          } catch (_e) {
+          } catch {
             // If we can't parse the error, use the default message
           }
           throw new Error(errorMessage);

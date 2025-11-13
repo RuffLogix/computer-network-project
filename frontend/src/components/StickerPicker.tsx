@@ -65,6 +65,7 @@ export function StickerPicker({
             >
               <div className="w-12 h-12 flex items-center justify-center">
                 {sticker.endsWith(".svg") ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={sticker}
                     alt={`Sticker ${index + 1}`}

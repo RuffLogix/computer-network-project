@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/rufflogix/computer-network-project/internal/config"
 	"github.com/rufflogix/computer-network-project/internal/controller"
 	"github.com/rufflogix/computer-network-project/internal/entity"
@@ -52,6 +53,12 @@ func initializeGlobalChat(chatService service.ChatService) int64 {
 }
 
 func main() {
+	// Load env
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Failed to load .env file")
+	}
+
 	// Connect to MongoDB
 	db := config.ConnectDB()
 
@@ -92,7 +99,7 @@ func main() {
 
 	// Configure CORS
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{os.Getenv("FRONTEND_URL")},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-User-ID", "x-user-id"},
 		ExposeHeaders:    []string{"Content-Length"},

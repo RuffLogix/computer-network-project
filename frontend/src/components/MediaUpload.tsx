@@ -1,8 +1,7 @@
 "use client";
 
-import NextImage from "next/image";
 import { useRef, useState } from "react";
-import { Image as ImageIcon, X, Upload } from "lucide-react";
+import { Image as ImageIcon, Upload } from "lucide-react";
 import {
   MAX_FILE_SIZE,
   MAX_MEDIA_SIZE,
@@ -18,8 +17,6 @@ interface MediaUploadProps {
 
 export function MediaUpload({ onUpload, userId }: MediaUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [fileType, setFileType] = useState<"image" | "video" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,8 +46,6 @@ export function MediaUpload({ onUpload, userId }: MediaUploadProps) {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const previewUrl = e.target?.result as string;
-      setPreview(previewUrl);
-      setFileType(isImage ? "image" : "video");
 
       // Now upload to server
       const formData = new FormData();
@@ -75,16 +70,12 @@ export function MediaUpload({ onUpload, userId }: MediaUploadProps) {
         if (data.url) {
           // Pass both server URL and preview
           onUpload(data.url, isImage ? "image" : "video", previewUrl);
-          setPreview(null);
-          setFileType(null);
         } else {
           throw new Error("Malformed upload response");
         }
       } catch (error) {
         console.error("Upload failed:", error);
         alert("Failed to upload file");
-        setPreview(null);
-        setFileType(null);
       } finally {
         setUploading(false);
         if (fileInputRef.current) {
@@ -93,14 +84,6 @@ export function MediaUpload({ onUpload, userId }: MediaUploadProps) {
       }
     };
     reader.readAsDataURL(file);
-  };
-
-  const clearPreview = () => {
-    setPreview(null);
-    setFileType(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   return (
