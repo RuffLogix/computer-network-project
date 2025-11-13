@@ -1,26 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { FileText, X, Upload, Paperclip } from "lucide-react";
+import { Upload, Paperclip } from "lucide-react";
 import { MAX_FILE_SIZE, ALLOWED_FILE_TYPES, API_BASE_URL } from "@/constants";
 
 interface FileUploadProps {
   userId: number;
   onUpload: (url: string, fileName: string, fileSize: number) => void;
-  onClear?: () => void;
 }
 
-export function FileUpload({ onUpload, userId, onClear }: FileUploadProps) {
+export function FileUpload({ onUpload, userId }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -200,11 +200,12 @@ export function ChatInput({
               mediaPreview && (
                 <div className="mt-2">
                   {mediaType === "image" && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={mediaPreview}
                       alt="Preview"
                       className="max-h-32 w-auto rounded border border-gray-300 dark:border-gray-600 object-contain"
-                      onError={(e) => {
+                      onError={() => {
                         console.error("Image failed to load:", mediaPreview);
                       }}
                     />
@@ -214,7 +215,7 @@ export function ChatInput({
                       src={mediaPreview}
                       controls
                       className="max-h-32 w-auto rounded border border-gray-300 dark:border-gray-600"
-                      onError={(e) => {
+                      onError={() => {
                         console.error("Video failed to load:", mediaPreview);
                       }}
                     />

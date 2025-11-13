@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { API_BASE_URL } from "@/constants";
 import { AuthService } from "@/lib/auth";
 
@@ -10,7 +10,6 @@ export default function ChatInvitePage() {
   const router = useRouter();
   const params = useParams();
   const locale = useLocale();
-  const t = useTranslations();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );

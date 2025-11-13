@@ -115,6 +115,7 @@ export function MessageItem({
       // Check if it's an SVG
       if (message.media_url.endsWith(".svg")) {
         return (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={message.media_url}
             alt="Sticker"
