@@ -1,7 +1,6 @@
 import { AuthResponse } from "@/types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export class AuthService {
   private static readonly TOKEN_KEY = "auth_token";
@@ -117,7 +116,7 @@ export class AuthService {
 
   static async fetchWithAuth(
     url: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<Response> {
     const headers = {
       "Content-Type": "application/json",

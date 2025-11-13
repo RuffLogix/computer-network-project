@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/rufflogix/computer-network-project/internal/config"
 	"github.com/rufflogix/computer-network-project/internal/controller"
 	"github.com/rufflogix/computer-network-project/internal/entity"
@@ -52,6 +53,12 @@ func initializeGlobalChat(chatService service.ChatService) int64 {
 }
 
 func main() {
+	// Load env
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Failed to load .env file")
+	}
+
 	// Connect to MongoDB
 	db := config.ConnectDB()
 
