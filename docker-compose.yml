@@ -35,8 +35,8 @@ services:
       - "3391:3000"
     depends_on:
       - backend
-    environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8080
+    env_file:
+      - ./frontend/.env
 
 volumes:
   mongo_data:
