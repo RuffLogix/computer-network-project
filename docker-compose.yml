@@ -7,10 +7,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: chatdb
+    env_file:
+      - ./env
 
   backend:
     build:
@@ -22,11 +20,8 @@ services:
       - "8481:8080"
     depends_on:
       - mongo
-    environment:
-      - MONGODB_URI=mongodb://admin:password@mongo:27017/chatdb?authSource=admin
-      - MONGODB_DATABASE=chatdb
-      - PORT=8080
-      - FRONTEND_URL=http://localhost:3391
+    env_file:
+      - ./backend/.env
     volumes:
       - ./backend/uploads:/root/uploads
 
