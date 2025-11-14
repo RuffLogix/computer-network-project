@@ -98,7 +98,17 @@ func (s *implChatService) GetAllChats() ([]*entity.Chat, error) {
 
 // Message operations
 func (s *implChatService) SendMessage(message *entity.Message) error {
-	return s.chatRepository.CreateMessage(message)
+	if err := s.chatRepository.CreateMessage(message); err != nil {
+		return err
+	}
+
+	if message.CreatedBy != 0 {
+		if user, err := s.userRepository.GetUserByNumericID(message.CreatedBy); err == nil {
+			message.CreatedByUser = user
+		}
+	}
+
+	return nil
 }
 
 func (s *implChatService) GetMessages(chatID int64, limit, offset int) ([]*entity.Message, error) {
