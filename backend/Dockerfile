@@ -22,6 +22,9 @@ WORKDIR /root/
 # Copy the binary
 COPY --from=builder /app/server .
 
+# Copy .env file
+COPY --from=builder /app/.env .
+
 # Copy uploads directory if needed
 COPY --from=builder /app/uploads ./uploads
 
