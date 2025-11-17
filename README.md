@@ -2,6 +2,8 @@
 
 This repository contains the code for a chat application developed as part of a computer networks course project. The application consists of a backend server written in Go and a frontend application built with Next.js.
 
+![Demo](/public/demo.png)
+
 Tech Stack:
 
 - **Backend**: Go (Gin, Gorilla WebSocket, MongoDB)
